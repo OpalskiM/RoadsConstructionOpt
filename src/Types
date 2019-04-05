@@ -1,0 +1,11 @@
+###Types
+#Added ID to agent
+
+mutable struct Agent
+		ID::Int64
+    start_node::Int64
+    fin_node::Int64
+    route::Array{Tuple{Int64,Int64},1}
+    current_edge::Int64
+    expected_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64}
+end
