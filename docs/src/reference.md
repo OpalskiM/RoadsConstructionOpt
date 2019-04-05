@@ -5,7 +5,6 @@ Reference
 CurrentModule = RoadsConstructionOpt
 DocTestSetup = quote
     using RoadsConstructionOpt
-	using RoadsConstructionOpt
 end
 ```
 
