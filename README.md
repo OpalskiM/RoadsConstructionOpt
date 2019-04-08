@@ -7,5 +7,5 @@ Optimization of road network within V2I communication
 
 **Build status**
 
-[![Build Status](https://travis-ci.org/OpalskiM/RSUOptimization.jl.svg?branch=master)](https://travis-ci.org/OpalskiM/RoadsConstructionOpt.jl)
-[![codecov](https://img.shields.io/codecov/c/gh/OpalskiM/RoadsConstructionOpt.jl.svg)](https://codecov.io/gh/OpalskiM/RoadsConstructionOpt.jl)
+[![Build Status](https://travis-ci.org/OpalskiM/RSUOptimization.svg?branch=master)](https://travis-ci.org/OpalskiM/RoadsConstructionOpt)
+[![codecov](https://img.shields.io/codecov/c/gh/OpalskiM/RoadsConstructionOpt.svg)](https://codecov.io/gh/OpalskiM/RoadsConstructionOpt)
