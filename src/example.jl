@@ -119,10 +119,6 @@ map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
 @time plotmap(map_data; width = 1000, height = 1000)
 sim_data=get_sim_data(map_data,N,l)
 
-#len - dlugosc, wzor
-#na kazdej krawedzi - dlugosc przez wage
-#laczny czas trasy - kazda krawedz * wi/len
-
 
 function calculate_driving_time(ρ::Float64,
                                 ρ_max::Float64,
