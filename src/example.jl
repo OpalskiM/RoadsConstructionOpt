@@ -106,10 +106,8 @@ function get_sim_data(m::MapData,
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
 
-N = 100;
+N = 10000;
 iter = 1;
-λ_ind = 0.4;
-λ_soc = 0.2;
 l = 5.0;
 
 pth = "C:/RoadsConstructionOpt/Roboczy/"
@@ -117,8 +115,7 @@ name = "mapatest2.osm"
 
 map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
 @time plotmap(map_data; width = 1000, height = 1000)
-sim_data=get_sim_data(map_data,N,l)
-
+@time sim_data=get_sim_data(map_data,N,l)
 
 function calculate_driving_time(ρ::Float64,
                                 ρ_max::Float64,
@@ -141,10 +138,8 @@ function update_stats!(stats::Stats, edge0::Int, edge1::Int, driving_time::Float
     stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.cars_count[edge0, edge1]
 end
 #
-function update_routes!(sim_data::SimData, stats::Stats,
-                        λ_soc::Float64, perturbed::Bool)
+function update_routes!(sim_data::SimData, stats::Stats)
      for agent in sim_data.population
-		λ = λ_soc
 		old_route = agent.route
         agent.route = get_route(sim_data.map_data,
                                 sim_data.driving_times + agent.expected_driving_times,
@@ -154,10 +149,7 @@ function update_routes!(sim_data::SimData, stats::Stats,
 end
 
 
-function run_single_iteration!(sim_data::SimData,
-                                λ_ind::Float64,
-                                λ_soc::Float64;
-                                perturbed::Bool = true)
+function run_single_iteration!(sim_data::SimData)
     sim_clock = DataStructures.PriorityQueue{Int, Float64}()
     for i = 1:length(sim_data.population)
         sim_clock[i] = departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route)
@@ -185,8 +177,30 @@ function run_single_iteration!(sim_data::SimData,
             sim_clock[id] += driving_time
         end
     end
-    update_routes!(sim_data, stats, λ_soc, perturbed)
+    update_routes!(sim_data, stats)
 	return stats
 end
 
-run_single_iteration!(sim_data,λ_ind, λ_soc,perturbed=false)
+@time run_single_iteration!(sim_data)
+
+
+function run_simulation!(sim_data::SimData,
+                                iter::Int64,
+								proc_id=0)
+    fname = "TEST"
+    @info "Opening file $fname"
+    file = open(fname, "w")
+    println(file, "proc,time,i,type,l_ind,l_soc,mean_driving_times,std_driving_times,mean_delays,std_delays,routes_changed")
+    for i = 1:iter
+		println(i)
+        start_time = time()
+        stats = run_single_iteration!(sim_data)
+		filtered_times = filter(x -> !isnan(x) && x != 0, stats.avg_driving_times ./ sim_data.driving_times)
+        println(file,join(
+            [proc_id, Int(round(time()-start_time)), i,"D",mean(filtered_times), std(filtered_times), mean(stats.delays),std(stats.delays),stats.routes_changed], ","))
+        flush(file)
+    end
+    close(file)
+end
+
+@time run_simulation!(sim_data,5)
