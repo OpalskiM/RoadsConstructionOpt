@@ -117,9 +117,9 @@ map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
 @time plotmap(map_data; width = 1000, height = 1000)
 @time sim_data=get_sim_data(map_data,N,l)
 
-function update_travels!(agent::Agent, edge0::Int, edge1::Int,
-                        driving_time::Float64)
-    agent.travel_times[edge0, edge1] +=(driving_time - agent.travel_times[edge0, edge1])
+function update_travels!(agent::Agent,
+                        driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64})
+    agent.travel_times += (driving_times - agent.travel_times)
 end
 
 function calculate_driving_time(ρ::Float64,
