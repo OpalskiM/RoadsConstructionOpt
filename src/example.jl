@@ -14,7 +14,7 @@ mutable struct Agent
     end_node::Int64
     route::Array{Tuple{Int64,Int64},1}
     current_edge::Int64
-    expected_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64}
+    travel_times::SparseArrays.SparseMatrixCSC{Float64,Int64}
 end
 
 mutable struct SimData
@@ -81,11 +81,11 @@ function create_agents(m::MapData,
         end
         if !haskey(buffer,nodes)
             route = get_route(m, w, nodes[1], nodes[2])
-            expected_driving_times = SparseArrays.spzeros(size(w)[1], size(w)[2])
+            travel_times = SparseArrays.spzeros(size(w)[1], size(w)[2])
             agent = Agent(nodes[1], nodes[2],
                             route,
                             1,
-                            expected_driving_times)
+                            travel_times)
             buffer[nodes] = [agent]
             push!(nodes_list,nodes)
         else
@@ -107,7 +107,7 @@ function get_sim_data(m::MapData,
 end
 
 N = 10000;
-iter = 1;
+iter = 5;
 l = 5.0;
 
 pth = "C:/RoadsConstructionOpt/Roboczy/"
@@ -116,6 +116,11 @@ name = "mapatest2.osm"
 map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
 @time plotmap(map_data; width = 1000, height = 1000)
 @time sim_data=get_sim_data(map_data,N,l)
+
+function update_travels!(agent::Agent, edge0::Int, edge1::Int,
+                        driving_time::Float64)
+    agent.travel_times[edge0, edge1] +=(driving_time - agent.travel_times[edge0, edge1])
+end
 
 function calculate_driving_time(ρ::Float64,
                                 ρ_max::Float64,
@@ -140,9 +145,10 @@ end
 #
 function update_routes!(sim_data::SimData, stats::Stats)
      for agent in sim_data.population
+		  update_travels!(agent, stats.avg_driving_times)
 		old_route = agent.route
         agent.route = get_route(sim_data.map_data,
-                                sim_data.driving_times + agent.expected_driving_times,
+                                sim_data.driving_times + agent.travel_times,
                                 agent.start_node, agent.end_node)
 		(agent.route != old_route) && (stats.routes_changed += 1)
     end
@@ -152,7 +158,7 @@ end
 function run_single_iteration!(sim_data::SimData)
     sim_clock = DataStructures.PriorityQueue{Int, Float64}()
     for i = 1:length(sim_data.population)
-        sim_clock[i] = departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route)
+        sim_clock[i] = departure_time(sim_data.driving_times + sim_data.population[i].travel_times, sim_data.population[i].route)
     end
     m, n = size(sim_data.map_data.w)
     stats = Stats(m, n)
@@ -171,6 +177,7 @@ function run_single_iteration!(sim_data::SimData)
                                                 sim_data.max_densities[edge0, edge1],
                                                 sim_data.map_data.w[edge0, edge1],
                                                 sim_data.velocities[edge0, edge1])
+			update_travels!(agent,edge0, edge1, driving_time)
             update_stats!(stats, edge0, edge1, driving_time)
             traffic_densities[edge0, edge1] += 1.0
             agent.current_edge += 1
@@ -184,10 +191,10 @@ end
 @time run_single_iteration!(sim_data)
 
 
-function run_simulation!(sim_data::SimData,
+	function run_simulation!(sim_data::SimData,
                                 iter::Int64,
 								proc_id=0)
-    fname = "TEST"
+    fname = "TESTER"
     @info "Opening file $fname"
     file = open(fname, "w")
     println(file, "proc,time,i,type,l_ind,l_soc,mean_driving_times,std_driving_times,mean_delays,std_delays,routes_changed")
@@ -203,4 +210,10 @@ function run_simulation!(sim_data::SimData,
     close(file)
 end
 
-@time run_simulation!(sim_data,5)
+@time run_simulation!(sim_data,iter)
+
+
+#N = 1000;
+#iter = 500;
+#@time sim_data=get_sim_data(map_data,N,l)
+#@time run_simulation!(sim_data,iter)
