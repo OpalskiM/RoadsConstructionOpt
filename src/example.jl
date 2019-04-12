@@ -164,12 +164,12 @@ function update_routes!(sim_data::SimData, stats::Stats)
 		(agent.route != old_route) && (stats.routes_changed += 1)
     end
 end
-
+###Total time of agents travel
 function update_time!(agent::Agent, edge0::Int, edge1::Int,
 						driving_time::Float64)
 	agent.time += driving_time
 end
-
+###Total time of all agents travel
 function update_total_time!(stats::Stats, agent::Agent)
 		stats.total_time += agent.time
 	end
@@ -187,7 +187,7 @@ function update_total_time!(stats::Stats, agent::Agent)
 	        id, current_time = DataStructures.peek(sim_clock)
 	        agent = sim_data.population[id]
 	        (agent.current_edge != 1) && (traffic_densities[agent.route[agent.current_edge - 1][1], agent.route[agent.current_edge - 1][2]] -= 1.0)
-	        if agent.current_edge > length(agent.route)   ###route to  wynik funkcji get.route. Zbadaj jej dlugosc
+	        if agent.current_edge > length(agent.route)
 				push!(stats.delays, current_time)
 	            DataStructures.dequeue!(sim_clock)
 	            agent.current_edge = 1
