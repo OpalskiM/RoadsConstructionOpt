@@ -25,4 +25,4 @@ m.w[A[1],B[1]]=get_distance(A[1],B[1], m.nodes,m.n)
 push!(m.class,4) #Example
 
 sim_data=get_sim_data(m,N,l)
-get_distance(A[1],B[1], m.nodes,m.n) = 10 #ToDo - calculate
+sim_data.max_densities[A[1],B[1]] = 10 #ToDo - calculate

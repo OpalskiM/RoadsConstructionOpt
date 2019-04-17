@@ -221,5 +221,3 @@ function update_total_time!(stats::Stats, agent::Agent)
 		return stats.total_time
 	end
 	run_single_iteration!(sim_data)
-
-@time run_single_iteration!(sim_data)
