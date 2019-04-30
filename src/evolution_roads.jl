@@ -2,18 +2,21 @@
 #inspired by evolutionary.jl and modified
 
 using OpenStreetMapX
+using Random
 pth = "C:/RoadsConstructionOpt/Roboczy/"
-name = "mapatest2.osm"
+name = "radom.osm"
 map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
-#Generating example data
-#Considering 5 solutions, each of 10 roads.
-#Gain of adding each new road = 2000
-#Cost of adding each new road = distance between nodes 
 m=map_data
+#Considering at the moment:
+#5 solutions
+#Each solution contains 10 road
+#Gain of each road = fixed (2000 - example)
+#Cost of each road = distance between nodes
+N=5
    m1=rand(m.n,10,N)
    m2=rand(m.n,10,N)
    A=collect(keys(m.n))
-    N=5
+   #Creating Array of edges for each solution
        k=[]
        for i in 1:10
           push!(k,(m1[i,1][1],m2[i,1][1]))
@@ -28,12 +31,11 @@ m=map_data
           push!(k[j],(m1[i,j][1],m2[i,j][1]))
        end
     end
-
+#Creating Array of distances for each solution
       d=[]
       for i in 1:10
          push!(d,get_distance(k[1][i][1],k[1][i][2], m.nodes,m.n))
       end
-
 
       for j=1:N
       d[j]=[]
@@ -44,7 +46,39 @@ m=map_data
          push!(d[j],get_distance(k[j][i][1],k[j][i][2], m.nodes,m.n))
       end
       end
+#Creating Array of edges for each solution (numbers from OSM )
+      k2=[]
+       for i in 1:10
+          push!(k2,(m1[i,1][2],m2[i,1][2]))
+       end
 
+       for j in 1:N
+       k2[j]=[]
+       end
+
+       for j =1:N
+       for i in 1:10
+          push!(k2[j],(m1[i,j][2],m2[i,j][2]))
+       end
+    end
+ K2=k2[1:N]
+ #Creating Array of reversed edges (to make sure, that road is two-way)
+k3=[]
+for i in 1:10
+   push!(k3,(m1[i,1][2],m2[i,1][2]))
+end
+
+for j in 1:N
+k3[j]=[]
+end
+
+for j =1:N
+for i in 1:10
+push!(k3[j],reverse(K2[j][i]))
+end
+end
+#Creating Array of gains for each solution (at the moment fixed):
+#ToDo - depend of simulation
       g=[]
       for i in 1:10
          push!(g,2000)
@@ -59,20 +93,28 @@ m=map_data
          push!(g[j],2000)
       end
       end
-      #initial population
+      #Creating Array of classes (At the moment assuming fixed class)
+c=zeros(Int64,10,1)
+for i in 1:10
+    c[i]=4
+end
+#Initial populationSize
       K=k[1:N]
       D=d[1:N]
       G=g[1:N]
-
-     #Example fitness Function
-     #At the moment - fixed gain(for each road set Gain=2000) and costs (=distance between nodes)
-     #ToDo: Incorporate OSM features
+      K2=k2[1:N]
+      K3=k3[1:N]
+#K,K2,K3 - Arrays of edges
+#D - Array of Distances
+#G - Array of gains
+#c - Array of road classes
+gain=2000 #Fixed for each road
 function fitFunc(population,i)
    gain * length(population[i])-sum(get_distance(population[i][j][1],population[i][j][2],m.nodes,m.n) for j=1:10)
 end
 
-Auxilliary:
 const Individual = Union{Vector, Matrix, Function, Nothing}
+
 function pselection(prob::Vector{Float64}, N::Int)
     cp = cumsum(prob)
     selected = Array{Int}(undef, N)
@@ -87,8 +129,7 @@ function pselection(prob::Vector{Float64}, N::Int)
     return selected
 end
 
-#selection roulette (example)
-#ToDo:Change mechanism of selection
+#selekcja ruletka
 function roulette(fitness::Vector{Float64}, N::Int)
     prob = fitness./sum(fitness)
     return pselection(prob, N)
@@ -100,8 +141,6 @@ function vswap!(v1::T, v2::T, idx::Int) where {T <: Vector}
     v2[idx] = val
 end
 
-#crossover mechanism (example)
-#ToDo: Change mechanism of crossover
 function singlepoint(v1::T, v2::T) where {T <: Vector}
     l = length(v1)
     c1 = copy(v1)
@@ -130,6 +169,7 @@ end
         return  individual
     end
 
+#funkcja keep
 function keep(interim, v, vv, col)
        if interim
            if !haskey(col, v)
@@ -139,23 +179,19 @@ function keep(interim, v, vv, col)
        end
    end
 
+   function insertion(recombinant::T) where {T <: Vector}# - random mutation
+       l = length(recombinant)
+       from, to = rand(1:l, 2)
+       val = (rand(m.n)[1],rand(m.n)[1])
+       deleteat!(recombinant, from)
+       return insert!(recombinant, to, val)
+   end
+
    function swap!(v::T, from::Int, to::Int) where {T <: Vector}
    val = v[from]
    v[from] = v[to]
    v[to] = val
    end
-
-   function inversion(recombinant::T) where {T <: Vector}
-       l = length(recombinant)
-       from, to = rand(1:l, 2)
-       from, to = from > to ? (to, from)  : (from, to)
-       l = round(Int,(to - from)/2)
-       for i in 0:(l-1)
-           swap!(recombinant, from+i, to-i)
-       end
-       return recombinant
-   end
-
 
    function ga(objfun::Function=fitFunc, N::Int=5;
                initPopulation::Individual=K,
@@ -167,7 +203,7 @@ function keep(interim, v, vv, col)
                ɛ::Real = 1,
                selection::Function = roulette,
                crossover::Function = singlepoint,
-               mutation::Function = inversion,
+               mutation::Function = insertion,
                iterations::Integer = N,
                tol::Float64 = 0.0 ,
                tolIter::Float64 = 10.0,
@@ -177,15 +213,20 @@ function keep(interim, v, vv, col)
        store = Dict{Symbol,Any}()
        # Setup parameters
        elite = isa(ɛ, Int) ? ɛ : round(Int, ɛ * populationSize)
+       objfun=fitFunc
        # Initialize population
-       individual = getIndividual(initPopulation, N)
-       fitness = zeros(populationSize)
+       individual = getIndividual(initPopulation, N) #wymiary sie musza zgadzac
+       fitness = zeros(populationSize) #j.w
        population = Array{typeof(individual)}(undef, populationSize)
        offspring = similar(population)
-   #population
+   #populacja
        for i in 1:populationSize
            if isa(initPopulation, Array)
                population[i] = initPopulation[i]
+           elseif isa(initPopulation, Matrix)
+               population[i] = initPopulation[:, i]
+           elseif isa(initPopulation, Function)
+               population[i] = initPopulation(N) # Creation function
            else
                error("Cannot generate population")
           end
@@ -202,7 +243,6 @@ function keep(interim, v, vv, col)
        fittolitr = 1
        while true
            debug && println("BEST: $(fitidx)")
-           #choosing selection
            selected = selection(fitness, populationSize)
            # Perform mating
            #crossover=singlepoint
@@ -236,12 +276,12 @@ function keep(interim, v, vv, col)
            # New generation
            for i in 1:populationSize
                population[i] = offspring[i]
-               fitness[i] = fitFunc(population,i)
+               fitness[i] = fitFunc(population,i)  #??????????????
                debug && println("FIT $(i): $(fitness[i])")
            end
            fitidx = sortperm(fitness, rev = true)
            bestIndividual = fitidx[1]
-           curGenFitness = objfun(bestIndividual)
+           curGenFitness = objfun(population,bestIndividual)
            fittol = abs(bestFitness - curGenFitness)
            bestFitness = curGenFitness
            keep(interim, :fitness, copy(fitness), store)
