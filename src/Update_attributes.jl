@@ -31,7 +31,7 @@ include("evolution_roads.jl")
             for j=1:5
                 for i=1:10
             push!(m1[j].e,a[j][i])
-            push!(ololol[j].e,d[j][i])
+            push!(m1[j].e,d[j][i])
             m1[j].w[b[j][i][1],b[j][i][2]]=get_distance(b[j][i][1],b[j][i][2],m.nodes,m.n)
             m1[j].w[b[j][i][2],b[j][i][1]]=get_distance(b[j][i][1],b[j][i][2],m.nodes,m.n)
             push!(m1[j].class,c[i])
@@ -43,7 +43,7 @@ include("evolution_roads.jl")
         end
         end
         end
-    update(K2,K,c)
+    update(K2,K,c,K3)
 #K2 - vector of edges (number - OSM data)
 #K - Vector of edges (numbered 1...n)
 #c - Vector of road classes
