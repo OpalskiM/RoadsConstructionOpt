@@ -103,19 +103,30 @@ function create_agents(m::MapData,
     return reduce(vcat,[buffer[k] for k in nodes_list])
 end
 
+
+function get_velocities(m::OpenStreetMapX.MapData,
+            class_speeds::Dict{Int,Float64} = OpenStreetMapX.SPEED_ROADS_URBAN)
+    @assert length(m.e) == length(m.w.nzval)
+    indices = [(m.v[i],m.v[j]) for (i,j) in m.e]
+    V = SparseArrays.spzeros(length(m.v), length(m.v))
+    for (i,ind) in enumerate(indices)
+        V[ind[1],ind[2]] = class_speeds[m.class[i]]/3.6
+    end
+    V
+end
 function get_sim_data(m::MapData,
                     N::Int64,
 					l::Float64,
                     speeds = OpenStreetMapX.SPEED_ROADS_URBAN)::SimData
     driving_times = OpenStreetMapX.create_weights_matrix(m, OpenStreetMapX.network_travel_times(m, speeds))
-    velocities = OpenStreetMapX.get_velocities(m, speeds)
+    velocities = get_velocities(m, speeds)
 	max_densities = get_max_densities(m, l)
     agents = create_agents(m, driving_times, N)
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
 #Initial data:
 map_data =  OpenStreetMapX.get_map_data(pth,name,road_levels=Set(1:6),use_cache = false)
-;iter=5
+iter=5
 N=1000
 l=5.0
 @time sim_data=get_sim_data(map_data,N,l)
@@ -224,6 +235,3 @@ end
 
 #Measuring total output of initial road network (total travels time)
 run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
-
-
-	include("Data_Generation.jl")
