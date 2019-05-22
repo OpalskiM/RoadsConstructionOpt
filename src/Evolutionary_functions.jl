@@ -1,6 +1,4 @@
-###Functions needed to perform evolutionary algorithm
-
-    const Individual = Union{Vector, Matrix, Function, Nothing}
+const Individual = Union{Vector, Matrix, Function, Nothing}
 # Selection
     function pselection(prob::Vector{Float64}, N::Int)
         cp = cumsum(prob)
@@ -83,44 +81,21 @@
     v[to] = val
     end
 
-    #Deepcopy of initial sim_data
-    sim_data1 = deepcopy(sim_data)
-    
-    #Getting new sim_data (for new graph and map(MapData))
-    #Taking the same set of agents (to compare results)
-function get_sim_data2(m::MapData,
-    l::Float64,sim_data::SimData,
-    speeds = OpenStreetMapX.SPEED_ROADS_URBAN)::SimData
-driving_times = driving_times = OpenStreetMapX.create_weights_matrix(m, OpenStreetMapX.network_travel_times(m, speeds))
-velocities = OpenStreetMapX.get_velocities(m, speeds)
-max_densities = get_max_densities(m, l)
-agents = sim_data1.population
-for agent in agents
-    agent.route = get_route(m,m.w,agent.start_node,agent.fin_node)
-end
-return SimData(m, driving_times, velocities, max_densities, agents)
-end
+    const SPEED_ROADS_URBAN = Dict{Int,Float64}(
+        1 => 100,    # Motorway
+        2 => 90,    # Trunk
+        3 => 90,    # Primary
+        4 => 70,    # Secondary
+        5 => 50,    # Tertiary
+        6 => 40,    # Residential/Unclassified
+        7 => 20,     # Service
+        8 => 10)     # Living street
 
-const SPEED_ROADS_URBAN = Dict{Int,Float64}(
-1 => 100,    # Motorway
-2 => 90,    # Trunk
-3 => 90,    # Primary
-4 => 70,    # Secondary
-5 => 50,    # Tertiary
-6 => 40,    # Residential/Unclassified
-7 => 20,     # Service
-8 => 10)     # Living street
+        #time - total output of initial road network
+        time_in=run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
 
-#Value of time
-#Considering 22$ for hour (== 22/1440 per second)
-VoT =22/1440
-
-#time - total output of initial road network
-time_in=run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
-
-###Function evaluating improvement of new network
-#At the moment only assessing imrprovement in terms of time (ToDo: Add some costs)
-function fitFunc(i)
-    (time_in -  times[i]) * VoT
-    end
-    
+        ###Function evaluating improvement of new network
+        #At the moment only assessing imrprovement in terms of time (ToDo: Add some costs)
+        function fitFunc(i)
+            (time_in -  times[i]) * VoT
+            end
