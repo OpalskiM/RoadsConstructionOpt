@@ -1,19 +1,15 @@
 ### Using framework OSMXDES
 #Simulator to measure total time of agents' travels
 
-#ToDo:
-#Add re-routing and avoid Braess' Paradox:
-#re-routing only and if only route change improves total output (in other case information about better route is not given)
 
-#pth="C:/Users/Marcin/Downloads/"
-#name = "mapatest2.osm"
 pth = "C:/RoadsConstructionOpt/Roboczy/"
-name = "radom.osm"
+name = "map.osm"
 using OpenStreetMapX
 using LightGraphs
 using Plots
 using SparseArrays
 using DataStructures
+using Distributions
 using Statistics
 
 mutable struct Agent
@@ -126,10 +122,10 @@ function get_sim_data(m::MapData,
 end
 #Initial data:
 map_data =  OpenStreetMapX.get_map_data(pth,name,road_levels=Set(1:6),use_cache = false)
-#map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false)
-iter=5
+iter=20
 N=1000
 l=5.0
+
 @time sim_data=get_sim_data(map_data,N,l)
 
 function update_beliefs!(agent::Agent,
@@ -166,8 +162,8 @@ end
 function update_routes!(sim_data::SimData, stats::Stats,
     λ_soc::Float64, perturbed::Bool)
                         for agent in sim_data.population
-        #perturbed ? λ = λ_soc : λ = λ_soc * rand(Uniform(0.0,2.0))
-		λ = λ_soc
+        perturbed ? λ = λ_soc : λ = λ_soc * rand(Uniform(0.0,2.0))
+		#λ = λ_soc
         update_beliefs!(agent, stats.avg_driving_times, λ)
 		old_route = agent.route
         agent.route = get_route(sim_data.map_data,
@@ -175,24 +171,6 @@ function update_routes!(sim_data::SimData, stats::Stats,
                                 agent.start_node, agent.fin_node)
 		(agent.route != old_route) && (stats.routes_changed += 1)
     end
-end
-function update_routes2!(sim_data::SimData, stats::Stats,
-    λ_soc::Float64, perturbed::Bool)
-	a=sum(departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route) for i in 1:length(sim_data.population))
-                        for agent in sim_data.population
-        #perturbed ? λ = λ_soc : λ = λ_soc * rand(Uniform(0.0,2.0))
-		λ = λ_soc
-        update_beliefs!(agent, stats.avg_driving_times, λ)
-		old_route = agent.route
-        agent.route = get_route(sim_data.map_data,
-                                sim_data.driving_times + agent.expected_driving_times,
-                                agent.start_node, agent.fin_node)
-	#	(agent.route != old_route) && (stats.routes_changed += 1)
-		b=sum(departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route) for i in 1:length(sim_data.population))
-		if b<a
-			agent.route = old.route
-end
-end
 end
 
 
@@ -238,47 +216,7 @@ end
 	return stats
 end
 
-function run_single_iteration2!(sim_data::SimData,
-	λ_ind::Float64,
-	λ_soc::Float64;
-		perturbed::Bool = true)
-sim_clock = DataStructures.PriorityQueue{Int, Float64}()
-for i = 1:length(sim_data.population)
-	sim_clock[i] = departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route)
-end
-m, n = size(sim_data.map_data.w)
-stats = Stats(m, n)
-traffic_densities = SparseArrays.spzeros(m, n)
-while !isempty(sim_clock)
-	id, current_time = DataStructures.peek(sim_clock)
-	agent = sim_data.population[id]
-	(agent.current_edge != 1) && (traffic_densities[agent.route[agent.current_edge - 1][1], agent.route[agent.current_edge - 1][2]] -= 1.0)
-	if agent.current_edge > length(agent.route)
-		push!(stats.delays, current_time)
-		DataStructures.dequeue!(sim_clock)
-		agent.current_edge = 1
-	else
-		edge0, edge1 = agent.route[agent.current_edge]
-		driving_time = calculate_driving_time(traffic_densities[edge0, edge1],
-											sim_data.max_densities[edge0, edge1],
-											sim_data.map_data.w[edge0, edge1],
-											sim_data.velocities[edge0, edge1])
-		update_beliefs!(agent,edge0, edge1, driving_time, λ_ind)
-		update_stats!(stats, edge0, edge1, driving_time)
-		traffic_densities[edge0, edge1] += 1.0
-		agent.current_edge += 1
-		sim_clock[id] += driving_time
-		update_time(stats,driving_time)
-	end
-end
-update_routes2!(sim_data, stats, λ_soc, perturbed)
-return stats
-end
-
 @time run_single_iteration!(sim_data,1.0,1.0,perturbed=false)
-@time run_single_iteration2!(sim_data,1.0,1.0,perturbed=false)
-#roznica czasu w chuj duza. Dla 1000 agentow - 2 sekundy pierwsza opcja, druga opcja 127 sekund. 60 razy wiecej, lol
-
 
 function run_simulation!(sim_data::SimData,
     λ_ind::Float64,
@@ -293,20 +231,5 @@ end
 return filtr[iter]
 end
 
-function run_simulation2!(sim_data::SimData,
-    λ_ind::Float64,
-    λ_soc::Float64,
-    iter::Int64;
-    perturbed::Bool = true, proc_id=0)
-    filtr=[]
-for i = 1:iter
-stats = run_single_iteration2!(sim_data, λ_ind, λ_soc, perturbed = perturbed)
-push!(filtr,stats.total_time)
-end
-return filtr[iter]
-end
-
-
 #Measuring total output of initial road network (total travels time)
-@time run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
-@time run_simulation2!(sim_data,0.0,0.0,iter,perturbed=false)
+@time run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
