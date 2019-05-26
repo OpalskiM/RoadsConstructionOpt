@@ -1,17 +1,3 @@
-### Using framework OSMXDES
-#Simulator to measure total time of agents' travels
-
-
-pth = "C:/RoadsConstructionOpt/Roboczy/"
-name = "map.osm"
-using OpenStreetMapX
-using LightGraphs
-using Plots
-using SparseArrays
-using DataStructures
-using Distributions
-using Statistics
-
 mutable struct Agent
     start_node::Int64
     fin_node::Int64
@@ -120,12 +106,8 @@ function get_sim_data(m::MapData,
     agents = create_agents(m, driving_times, N)
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
-#Initial data:
+#Initializing data:
 map_data =  OpenStreetMapX.get_map_data(pth,name,road_levels=Set(1:6),use_cache = false)
-iter=20
-N=1000
-l=5.0
-
 @time sim_data=get_sim_data(map_data,N,l)
 
 function update_beliefs!(agent::Agent,
@@ -216,8 +198,6 @@ end
 	return stats
 end
 
-@time run_single_iteration!(sim_data,1.0,1.0,perturbed=false)
-
 function run_simulation!(sim_data::SimData,
     λ_ind::Float64,
     λ_soc::Float64,
@@ -232,4 +212,4 @@ return filtr[iter]
 end
 
 #Measuring total output of initial road network (total travels time)
-@time run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
+#@time run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)

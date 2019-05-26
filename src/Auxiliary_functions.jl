@@ -1,4 +1,5 @@
-using Random
+#Procedure to create solutions of new roads
+
 
 #1. Counting Visits
 m=map_data
@@ -36,7 +37,7 @@ roulette2(Traff3,1)[1]
 
 #4. Drawing Edges
 Keys =collect(keys(Traff))
-Dr_Edge=Keys[roulette2(Traff3,1)[1]] #- wylosowana krawedz
+Dr_Edge=Keys[roulette2(Traff3,1)[1]] # drawn edge
 
 #5. Randomly choosing n solutions (each consists of Z roads)
 m=map_data
@@ -54,16 +55,8 @@ for i in 1:n
   end
 end
 
-
-function remove_edges(m::OpenStreetMapX.MapData,edgelist::Array{Tuple{Int,Int}})
-g = deepcopy(m.g)
-for edge in edgelist
-  rem_edge!(g, map_data.v[edge[1]],map_data.v[edge[2]])
-end
-g
-end
-
-function remove_edges3(m::OpenStreetMapX.MapData,edgelist::Array{Any,1})
+#Functions to remove edges and rerouting
+function remove_edges(m::OpenStreetMapX.MapData,edgelist::Array{Any,1})
 g = deepcopy(m.g)
   for edge in edgelist
       rem_edge!(g,edge[1],edge[2])
@@ -71,7 +64,7 @@ g = deepcopy(m.g)
   g
 end
 
-function new_graph_routing5(m::OpenStreetMapX.MapData,
+function new_graph_routing(m::OpenStreetMapX.MapData,
                       g::LightGraphs.SimpleDiGraph{Int64},
                       w::SparseArrays.SparseMatrixCSC{Float64,Int64},
                       node0::Int, node1::Int)

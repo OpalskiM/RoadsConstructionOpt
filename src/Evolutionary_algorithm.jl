@@ -1,30 +1,19 @@
-Variables:
- n = 30 #Number of solutions
- iter=5 #Number of iterations
-  l=5.0 # vehicles length
-  N=1000 #Number of vehicles
-  Z=5 #Number of roads in one solution
-  CrossoverRate=0.7
-  MutationRate=0.05
 
-#Function assessing simulation with 1
-      time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
+#time_in - simulation time for existing network (benchmark)
+time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
 #      time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed=true)
 
-
       Sol = sol[1:n]
-      using Random
       times = []
-      function EA(objfun::Function,iterations::Integer,
+      function Evolutionary_algorithm(objfun::Function,iterations::Integer,
           crossoverRate::Float64,
           mutationRate::Float64,
-          perturbed::Bool;
           n::Int=n,
           initPopulation::Individual=Sol,
           populationSize::Int = n,
           e::Real = 0.2,
           selection::Function = roulette,
-          crossover::Function = singlepoint,
+          crossover::Function = twopoint,
           mutation::Function = insertion,
           tol::Float64 = 0.0 ,
           tolIter::Float64 = 10.0,
@@ -54,13 +43,13 @@ Variables:
           error("Cannot generate population")
       end
       end
-      #Changing_data (see: Changing_data.jl)
+      #Changing_data
       m1 = deepcopy(m)
           for i in 1:n
           m1 = deepcopy(map_data)
-          g = remove_edges3(m1, sol[i])
+          g = remove_edges(m1, sol[i])
           for agent in sim_data.population
-              agent.route = new_graph_routing5(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
+              agent.route = new_graph_routing(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
           end
               simulation_time = run_simulation!(sim_data,1.0,1.0,iter,perturbed = false)
               push!(times,simulation_time)
@@ -117,9 +106,9 @@ Variables:
       times=[]
       for i in 1:n
           m1 = deepcopy(map_data)
-          g = remove_edges3(m1, population[i])
+          g = remove_edges(m1, population[i])
           for agent in sim_data.population
-              agent.route = new_graph_routing5(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
+              agent.route = new_graph_routing(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
           end
               simulation_time = run_simulation!(sim_data,1.0,1.0,iter,perturbed = false)
               push!(times,simulation_time)

@@ -1,4 +1,7 @@
+#Functions needed to perform evoulutionary algorithm
+
 const Individual = Union{Vector, Matrix, Function, Nothing}
+
 # Selection
     function pselection(prob::Vector{Float64}, N::Int)
         cp = cumsum(prob)
@@ -14,7 +17,7 @@ const Individual = Union{Vector, Matrix, Function, Nothing}
         return selected
     end
 
-    #selection - roulette
+    #selection - roulette algorithm
     function roulette(fitness::Vector{Float64}, N::Int)
         prob = fitness./sum(fitness)
         return pselection(prob, N)
@@ -26,17 +29,19 @@ const Individual = Union{Vector, Matrix, Function, Nothing}
         v2[idx] = val
     end
 
-    #Crossover - singlepoint
-    function singlepoint(v1::T, v2::T) where {T <: Vector}
-        l = length(v1)
-        c1 = copy(v1)
-        c2 = copy(v2)
-        pos = rand(1:l)
-        for i in pos:l
-            vswap!(c1, c2, i)
-        end
-        return c1, c2
-    end
+    #Crossover - twopoint algorithm
+            function twopoint(v1::T, v2::T) where {T <: Vector}
+                l = length(v1)
+                c1 = copy(v1)
+                c2 = copy(v2)
+                from, to = rand(1:l, 2)
+                from, to = from > to ? (to, from)  : (from, to)
+                for i in from:to
+                    vswap!(c1, c2, i)
+                end
+                return c1, c2
+            end
+
 
     # Obtain individual
         function getIndividual(init::Individual, N::Int)
@@ -91,11 +96,9 @@ const Individual = Union{Vector, Matrix, Function, Nothing}
         7 => 20,     # Service
         8 => 10)     # Living street
 
-        #time - total output of initial road network
-        time_in=run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
-
-        ###Function evaluating improvement of new network
-        #At the moment only assessing imrprovement in terms of time (ToDo: Add some costs)
-        function fitFunc(i)
-            (time_in -  times[i]) * VoT
-            end
+     #Fitfunction -function to measure relative progress of the solution
+     #time_in - total time of initial simulation
+     #times[i] - total_time of "i" new simulation
+            function fitFunc(time_in::Float64,i)
+                ((time_in -  times[i]) * 100/time_in)
+                end
