@@ -1,21 +1,3 @@
-### Using framework OSMXDES
-#Simulator to measure total time of agents' travels
-
-#ToDo:
-#Add re-routing and avoid Braess' Paradox:
-#re-routing only and if only route change improves total output (in other case information about better route is not given)
-
-#pth="C:/Users/Marcin/Downloads/"
-#name = "mapatest2.osm"
-pth = "C:/RoadsConstructionOpt/Roboczy/"
-name = "radom.osm"
-using OpenStreetMapX
-using LightGraphs
-using Plots
-using SparseArrays
-using DataStructures
-using Statistics
-
 mutable struct Agent
     start_node::Int64
     fin_node::Int64
@@ -124,11 +106,8 @@ function get_sim_data(m::MapData,
     agents = create_agents(m, driving_times, N)
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
-#Initial data:
+#Initializing data:
 map_data =  OpenStreetMapX.get_map_data(pth,name,road_levels=Set(1:6),use_cache = false)
-iter=5
-N=1000
-l=5.0
 @time sim_data=get_sim_data(map_data,N,l)
 
 function update_beliefs!(agent::Agent,
@@ -165,8 +144,8 @@ end
 function update_routes!(sim_data::SimData, stats::Stats,
     λ_soc::Float64, perturbed::Bool)
                         for agent in sim_data.population
-        #perturbed ? λ = λ_soc : λ = λ_soc * rand(Uniform(0.0,2.0))
-		λ = λ_soc
+        perturbed ? λ = λ_soc : λ = λ_soc * rand(Uniform(0.0,2.0))
+		#λ = λ_soc
         update_beliefs!(agent, stats.avg_driving_times, λ)
 		old_route = agent.route
         agent.route = get_route(sim_data.map_data,
@@ -176,6 +155,7 @@ function update_routes!(sim_data::SimData, stats::Stats,
     end
 end
 
+
 #Adding function measuring total_time of travel
 function update_time(stats::Stats,driving_time::Float64)
 	stats.total_time += driving_time
@@ -184,7 +164,7 @@ end
 	function run_single_iteration!(sim_data::SimData,
         λ_ind::Float64,
         λ_soc::Float64;
-                                perturbed::Bool = true)
+            perturbed::Bool = true)
     sim_clock = DataStructures.PriorityQueue{Int, Float64}()
     for i = 1:length(sim_data.population)
         sim_clock[i] = departure_time(sim_data.driving_times + sim_data.population[i].expected_driving_times, sim_data.population[i].route)
@@ -218,8 +198,6 @@ end
 	return stats
 end
 
-run_single_iteration!(sim_data,0.0,0.0,perturbed=false)
-
 function run_simulation!(sim_data::SimData,
     λ_ind::Float64,
     λ_soc::Float64,
@@ -234,4 +212,4 @@ return filtr[iter]
 end
 
 #Measuring total output of initial road network (total travels time)
-run_simulation!(sim_data,0.0,0.0,iter,perturbed=false)
+#@time run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
