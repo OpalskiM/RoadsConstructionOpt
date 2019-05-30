@@ -1,148 +1,77 @@
-
-#time_in - simulation time for existing network (benchmark)
-time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed=false)
-#      time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed=true)
-
-      Sol = sol[1:n]
-      times = []
-      function Evolutionary_algorithm(objfun::Function,iterations::Integer,
-          crossoverRate::Float64,
-          mutationRate::Float64,
-          n::Int=n,
-          initPopulation::Individual=Sol,
-          populationSize::Int = n,
-          e::Real = 0.2,
-          selection::Function = roulette,
-          crossover::Function = twopoint,
-          mutation::Function = insertion,
-          tol::Float64 = 0.0 ,
-          tolIter::Float64 = 10.0,
-          map_data::MapData=map_data,
-          m::MapData = map_data,
-          sim_data::SimData=sim_data,
-          verbose = true,
-          debug = true,
-          interim = true)
-      store = Dict{Symbol,Any}()
-      # Setup parameters
-      elite = isa(e, Int) ? e : round(Int, e    * populationSize)
-      objfun=fitFunc
-      time_in=run_simulation!(sim_data,1.0,1.0,iter,perturbed = false)
-      # Initialize population
-      individual = getIndividual(initPopulation, n)
-      fitness = zeros(populationSize)
-      population = Array{typeof(individual)}(undef, populationSize)
-      offspring = similar(population)
-      #population
-      for i in 1:populationSize
-      if isa(initPopulation, Array)
-          population[i] = initPopulation[i]
-      elseif isa(initPopulation, Matrix)
-          population[i] = initPopulation[:, i]
-      else
-          error("Cannot generate population")
-      end
-      end
-      #Changing_data
-      m1 = deepcopy(m)
-          for i in 1:n
-          m1 = deepcopy(map_data)
-          g = remove_edges(m1, sol[i])
-          for agent in sim_data.population
-              agent.route = new_graph_routing(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
-          end
-              simulation_time = run_simulation!(sim_data,1.0,1.0,iter,perturbed = false)
-              push!(times,simulation_time)
-          end
-          #Simulating traffic for new data
-      for i in 1:populationSize
-      fitness[i] = objfun(time_in,i)
-      end
-      fitidx = sortperm(fitness, rev = true)
-      println(fitidx)
-      keep(interim, :fitness, copy(fitness), store)
-      # Generate and evaluate offspring
-      itr = 1
-      bestFitness = 0.0
-      bestIndividual = 0
-      fittol = 0.0
-      fittolitr = 1
-      while true
-          debug && println("BEST: $(fitidx)")
-          selected = selection(fitness, populationSize)
-          # Perform mating
-          offidx = randperm(populationSize)
-          for i in 1:2:populationSize
-              j = (i == populationSize) ? i-1 : i+1
-              if rand() < crossoverRate
-                  debug && println("MATE $(offidx[i])+$(offidx[j])>: $(population[selected[offidx[i]]]) : $(population[selected[offidx[j]]])")
-                  offspring[i], offspring[j] = crossover(population[selected[offidx[i]]], population[selected[offidx[j]]])
-                  debug && println("MATE >$(offidx[i])+$(offidx[j]): $(offspring[i]) : $(offspring[j])")
-              else
-                  offspring[i], offspring[j] = population[selected[i]], population[selected[j]]
-              end
-          end
-          # Perform mutation
-          for i in 1:populationSize
-              if rand() < mutationRate
-                  debug && println("MUTATED $(i)>: $(offspring[i])")
-                  mutation(offspring[i])
-                  debug && println("MUTATED >$(i): $(offspring[i])")
-              end
-          end
-          # Elitism
-          if elite > 0
-              for i in 1:elite
-                  subs = rand(1:populationSize)
-                  debug && println("ELITE $(fitidx[i])=>$(subs): $(population[fitidx[i]]) => $(offspring[subs])")
-                  offspring[subs] = population[fitidx[i]]
-              end
-          end
-          # New generation
-          for i in 1:populationSize
-              population[i] = offspring[i]
-          end
-      m1 = deepcopy(map_data)
-      times=[]
-      for i in 1:n
-          m1 = deepcopy(map_data)
-          g = remove_edges(m1, population[i])
-          for agent in sim_data.population
-              agent.route = new_graph_routing(map_data,g,map_data.w,m.n[agent.start_node],m.n[agent.fin_node])
-          end
-              simulation_time = run_simulation!(sim_data,1.0,1.0,iter,perturbed = false)
-              push!(times,simulation_time)
-          end
-              #####
-          for i in 1:populationSize
-              fitness[i] = objfun(time_in,i)
-              debug && println("FIT $(i): $(fitness[i])")
-          end
-      fitidx = sortperm(fitness, rev = true)
-      bestIndividual = fitidx[1]
-      curGenFitness = objfun(time_in,fitidx[1])
-      fittol = abs(bestFitness - curGenFitness)
-      bestFitness = curGenFitness
-      keep(interim, :fitness, copy(fitness), store)
-      keep(interim, :bestFitness, bestFitness, store)
-      # Verbose step
-      verbose &&  println("BEST: $(bestFitness): $(population[bestIndividual]), G: $(itr)")
-      # Terminate:
-      #  if fitness tolerance is met for specified number of steps
-      if fittol < tol
-          if fittolitr > tolIter
-              break
-          else
-              fittolitr += 1
-          end
-      else
-          fittolitr = 1
-      end
-      # if number of iterations more then specified
-      if itr >= iterations
-          break
-      end
-      itr += 1
-      end
-      return population[bestIndividual], bestFitness, itr, fittol, store
-      end
+function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, 
+                    routes::Array{Tuple{Int,Int},1}, no_solutions::Int,
+                    roadwork_time::Int, no_of_partitions::Int,
+                    crossover_rate::Float64, mutation_rate::Float64, 
+                    elitism::Float64;
+                    burning_time::Int = 50, runtime::Int = 20,
+                    ϵ = 0.0001, maxiter::Int = 500, toliter::Int = 10)
+    #let no_solution be even:
+    mod(no_solutions,2) == 1 && (no_solutions += 1)
+    #prepare enviroment:
+    run_sim!(sim_data, λ_ind, burning_time)
+    #get reference scenario:
+    reference_times = run_sim!(deepcopy(sim_data), λ_ind, runtime)
+    #generate first solutions:
+    population = Tuple{Float64, Array{Tuple{Int64,Int64},1}}[]
+    for i = 1:no_solutions
+         push!(population, get_solution(deepcopy(sim_data),shuffle(routes), reference_times, λ_ind, roadwork_time, no_of_partitions))
+    end
+    @info "First generation done!"
+    sort!(population)
+    (best_fit, best_solution), _ = findmin(population)
+    (worst_fit, worst_solution), _ = findmax(population)
+    #main loop:
+    iter = 1
+    fit_iter = 1
+    δ = Inf
+    while true
+        offspring = similar(population)
+        #mating
+        mates = mating(population)
+        offidx = randperm(no_solutions) 
+        for i = 1:2:no_solutions
+            j = i + 1
+            if rand() < crossover_rate
+                seq1,seq2 = order1_crossover(population[mates[offidx[i]]][2], population[mates[offidx[j]]][2])
+                offspring[i], offspring[j] = (NaN, seq1), (NaN, seq2)
+            else
+                offspring[i], offspring[j] = population[mates[i]], population[mates[j]]
+            end
+        end
+        #mutation
+        for i in 1:no_solutions
+            (rand() < mutation_rate) && mutate!(offspring, i)
+        end
+        #elitism
+        for i in 1:Int(round(elitism*no_solutions))
+            idx = rand(1:no_solutions)
+            offspring[idx] = population[i]
+        end
+        #compute new fitnesses
+        for (id, individual) in enumerate(offspring)
+            if isnan(individual[1])
+                offspring[id] = get_solution(deepcopy(sim_data),individual[2], 
+                                            reference_times, λ_ind, 
+                                            roadwork_time, no_of_partitions)
+            end
+        end
+        #convergence
+        population = offspring
+        sort!(population)
+        (next_best_fit, next_best_solution), _ = findmin(population)
+        (next_worst_fit, next_worst_solution), _ = findmax(population)
+        (next_worst_fit > worst_fit) && (worst_fit = next_worst_fit; worst_solution =  next_worst_solution)
+        δ = abs(next_best_fit - best_fit)
+        best_fit, best_solution = next_best_fit, next_best_solution
+        if δ < ϵ  
+            fit_iter > toliter && break
+            fit_iter += 1 
+        else
+            fit_iter = 1
+        end
+        iter += 1
+        iter >= maxiter && break
+        @info "iteration $iter done"
+    end
+    (best_fit, best_solution), (worst_fit, worst_solution)
+end
