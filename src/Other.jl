@@ -147,6 +147,7 @@ N = 1000; l = 5.0;
 map_data = OpenStreetMapX.get_map_data(pth, name)
 sim_data = get_sim_data(map_data,N,l)
 λ_ind = 0.5
+λ_soc = 0.4
 routes = map_data.e
 no_solutions = 50
 roadwork_time = 10
