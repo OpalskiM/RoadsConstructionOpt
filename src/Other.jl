@@ -134,15 +134,6 @@ end
 
 
 #Example
-function optimize2!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, 
-    routes::Array{Tuple{Int,Int},1}, no_solutions::Int,
-    roadwork_time::Int, no_of_partitions::Int,
-    crossover_rate::Float64, mutation_rate::Float64, 
-    elitism::Float64;
-    burning_time::Int = 50, runtime::Int = 20,
-    ϵ = 0.0001, maxiter::Int = 500, toliter::Int = 10)
-    
-    
 N = 1000; l = 5.0;
 map_data = OpenStreetMapX.get_map_data(pth, name)
 sim_data = get_sim_data(map_data,N,l)
