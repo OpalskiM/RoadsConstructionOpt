@@ -156,7 +156,7 @@ version = "0.1.9"
 deps = ["DataStructures", "DelimitedFiles", "LightGraphs", "OpenStreetMapX", "Random", "Serialization", "SparseArrays", "Statistics", "StatsBase", "Test"]
 git-tree-sha1 = "85be807bb288811a0ac94758429f0b9beafe5870"
 repo-rev = "master"
-repo-url = "https://github.com/pszufe/OpenStreetMapXDES.jl.git"
+repo-url = "https://github.com/pszufe/OpenStreetMapXDES.jl"
 uuid = "4b893ba0-438f-11e9-3ee9-5df3d5aef306"
 version = "0.1.0"
 

@@ -1,9 +1,14 @@
 using Pkg
 
+
+#Pkg.add(PackageSpec(url="https://github.com/pszufe/OpenStreetMapXDES.jl", rev="master"))
+
 import OpenStreetMapXDES 
 using OpenStreetMapX
 using Random
-Pkg.activate(".")
+
+Pkg.activate(".");
+
 using RoadsConstructionOpt
 
 #map_file_path = joinpath(dirname(pathof(OpenStreetMapX)),"..","test/data/reno_east3.osm")
@@ -31,6 +36,7 @@ res = NamedTuple[]
 
 for mymethod in [optimize!, optimize2!]
     sim_data_copy = deepcopy(sim_data)
+    Random.seed!(0);
     push!(res, mymethod(
         sim_data_copy,
         λ_ind,
@@ -42,5 +48,5 @@ for mymethod in [optimize!, optimize2!]
         mutation_rate,
         elitism;
         maxiter = 30
-    )
+    ))
 end
