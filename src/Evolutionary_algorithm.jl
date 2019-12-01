@@ -12,7 +12,7 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
     #get reference scenario:
     reference_times = run_sim!(deepcopy(sim_data), λ_ind, runtime)
     #generate first solutions:
-    population = Tuple{Float64, Array{Tuple{Int64,Int64},1}}[]
+    population = Tuple{Float64, Array{Tuple{Int,Int},1}}[]
     for i = 1:no_solutions
          push!(population, get_solution(deepcopy(sim_data),shuffle(routes), reference_times, λ_ind, roadwork_time, no_of_partitions))
     end
@@ -73,5 +73,5 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
         iter >= maxiter && break
         @info "iteration $iter done"
     end
-    (best_fit, best_solution), (worst_fit, worst_solution)
+    return (best_fit=best_fit, best_solution=best_solution, worst_fit=worst_fit, worst_solution=worst_solution)
 end

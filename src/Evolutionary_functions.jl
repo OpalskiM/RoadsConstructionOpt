@@ -1,6 +1,6 @@
-function split_sequence(edges::Array{Tuple{Int,Int},1}, k::Int)
+function split_sequence(edges::Vector{Tuple{Int,Int}}, k::Int)
     edgs = deepcopy(edges)
-    seq = Array{Tuple{Int64,Int64},1}[]
+    seq = Vector{Tuple{Int,Int}}[]
     size = Int(round(length(edgs)/k))
     len = length(edgs)
     while len > 0
@@ -15,8 +15,8 @@ function calculate_fitness(times, reference)
     sum(times)/length(times)
 end
 
-function get_solution(sim_data::OpenStreetMapXDES.SimData,routes::Array{Tuple{Int,Int},1},
-                    reference_times::Array{Float64,1},
+function get_solution(sim_data::OpenStreetMapXDES.SimData,routes::Vector{Tuple{Int,Int}},
+                    reference_times::Vector{Float64},
                     λ::Float64, roadwork_time::Int, no_of_partitions::Int)
     res = zeros(length(sim_data.population))
     for segments in split_sequence(routes,no_of_partitions)
@@ -27,7 +27,7 @@ function get_solution(sim_data::OpenStreetMapXDES.SimData,routes::Array{Tuple{In
     (calculate_fitness(res,reference_times),routes)
 end
 
-function mating(population::Array{Tuple{Float64,Array{Tuple{Int64,Int64},1}},1})
+function mating(population::Vector{Tuple{Float64, Vector{Tuple{Int, Int}}}})
     fit = [ind[1] for ind in population]
     cum_p = cumsum(fit ./ sum(fit))
     mates = zeros(Int,length(population))
@@ -41,7 +41,7 @@ function mating(population::Array{Tuple{Float64,Array{Tuple{Int64,Int64},1}},1})
     mates
 end
 
-function order1_crossover(v1::Array{Tuple{Int64,Int64},1}, v2::Array{Tuple{Int64,Int64},1})
+function order1_crossover(v1::Vector{Tuple{Int,Int}}, v2::Vector{Tuple{Int,Int}})
     l = length(v1)
     swap = rand(1:l, 2)
     alleles11, alleles21 = v1[minimum(swap) : maximum(swap)], v2[minimum(swap) : maximum(swap)]
@@ -51,7 +51,7 @@ function order1_crossover(v1::Array{Tuple{Int64,Int64},1}, v2::Array{Tuple{Int64
     c1,c2
 end
 
-function mutate!(population::Array{Tuple{Float64,Array{Tuple{Int64,Int64},1}},1}, id::Int)
+function mutate!(population::Vector{Tuple{Float64,Vector{Tuple{Int,Int}}}}, id::Int)
     seq = population[id][2]
     swap1, swap2 = rand(1:length(seq), 2)
     val = seq[swap1]

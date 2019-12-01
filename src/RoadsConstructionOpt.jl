@@ -1,8 +1,8 @@
 module RoadsConstructionOpt
 
-using OpenStreetMapX, OpenStreetMapXDES
+using OpenStreetMapX
+import OpenStreetMapXDES 
 using LightGraphs
-using Plots
 using SparseArrays
 using DataStructures
 using Distributions
@@ -16,5 +16,7 @@ include("evolutionary_algorithm.jl")
 include("evolutionary_functions.jl")
 
 export optimize!
+export run_sim!
+export get_solution
 
 end # module
