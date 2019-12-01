@@ -8,8 +8,8 @@ function remove_edges(m::OpenStreetMapX.MapData,edgelist::Array{Tuple{Int,Int},1
 end
 
 function new_graph_routing(m::OpenStreetMapX.MapData,
-                            g::Union{LightGraphs.SimpleDiGraph{Int64}, Nothing},
-                            w::SparseArrays.SparseMatrixCSC{Float64,Int64}, 
+                            g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing},
+                            w::SparseArrays.SparseMatrixCSC{Float64,Int}, 
                             v0::Int, v1::Int)
     heuristic(u,v) = OpenStreetMapX.get_distance(u, v, m.nodes, m.n)
     isa(g, Nothing) && (g = m.g)
@@ -20,7 +20,7 @@ end
 #Sim main functions
 
 function run_once!(sim_data::OpenStreetMapXDES.SimData, 
-                    g::Union{LightGraphs.SimpleDiGraph{Int64}, Nothing},
+                    g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing},
                     λ_ind::Float64)
     #initialize sim:
     sim_flow = OpenStreetMapXDES.ControlFlow(sim_data)
@@ -66,8 +66,8 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
     time_in_system
 end
 
-function run_sim!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, iter::Int64,
-                g::Union{LightGraphs.SimpleDiGraph{Int64}, Nothing} = nothing)
+function run_sim!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, iter::Int,
+                g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing} = nothing)
     res = zeros(length(sim_data.population))
     for i = 1:iter
         res .+= run_once!(sim_data, g, λ_ind)
