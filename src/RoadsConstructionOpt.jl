@@ -13,6 +13,7 @@ using Base.Iterators
 
 include("simulator.jl")
 include("evolutionary_algorithm.jl")
+include("evolutionary_algorithm2.jl")
 include("evolutionary_functions.jl")
 
 export optimize!
