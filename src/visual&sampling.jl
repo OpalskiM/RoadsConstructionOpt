@@ -71,4 +71,4 @@ weights = collect(values(prob)) #probabilities
 
 intersections = collect(keys(visits)) #intersections in the map
 
-StatsBase.direct_sample!(intersections,weights)[1:10]
+StatsBase.direct_sample!(intersections,weights)[1:10] #Example - choosing 10 roads
