@@ -15,17 +15,23 @@ Random.seed!(0)
 node_ids = collect(keys(mx.nodes)) 
 routes = Vector{Vector{Int}}()
 visits = Dict{Int,Int}()
+roads_visits = Dict{Tuple{Int,Int},Int}() ###Visits in each road
 for i in 1:10000
     a,b = [point_to_nodes(generate_point_in_bounds(mx), mx) for _ in 1:2]
     route, route_time = OpenStreetMapX.shortest_route(mx,a,b)
     if route_time < Inf # when we select points neaer edges no route might be found
         push!(routes, route)
         for n in route
-            visits[n] = get(visits, n,0)+1
-        end 
-    end
-end                                   
-println("We have generated ",length(routes)," non-empty routes")
+            if n<2
+                visits[n] = get(visits, n,0)+1
+            else
+                visits[n] = get(visits, n,0)+1  
+                roads_visits[n-1,n]=get(roads_visits, (n-1,n),0)+1   ###Counting visits in every road
+            end
+        end
+    end                      
+end
+    println("We have generated ",length(routes)," non-empty routes")
 
 #2. Visualization of most frequently visited intersections
 using PyCall
@@ -71,4 +77,24 @@ weights = collect(values(prob)) #probabilities
 
 intersections = collect(keys(visits)) #intersections in the map
 
-StatsBase.direct_sample!(intersections,weights)[1:10] #Example - choosing 10 roads
+StatsBase.direct_sample!(intersections,weights)[1:10] #Example - choosing 10 intersections
+
+#4. Weighted sampling of roads
+
+prob = Dict{Tuple{Int,Int},Real}() 
+
+for k=keys(roads_visits)
+    prob[k]=values(roads_visits[k])/sum(values(roads_visits))
+end
+
+weights = collect(values(prob)) #probabilities
+
+roads = collect(keys(prob)) #roads in the map
+
+dict = Dict(roads[i]=>i for i=1:length(roads))
+value=collect(values(dict))
+
+samp=StatsBase.direct_sample!(value,weights)[1:10] #Example - choosing number of 10 roads
+roads[samp] #Sample roads to remove from the graph
+
+
