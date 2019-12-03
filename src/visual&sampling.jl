@@ -77,7 +77,8 @@ weights = collect(values(prob)) #probabilities
 
 intersections = collect(keys(visits)) #intersections in the map
 
-StatsBase.direct_sample!(intersections,weights)[1:10] #Example - choosing 10 intersections
+n=10
+StatsBase.direct_sample!(intersections,weights)[1:n] #Example - choosing 10 intersections
 
 #4. Weighted sampling of roads
 
@@ -94,7 +95,8 @@ roads = collect(keys(prob)) #roads in the map
 dict = Dict(roads[i]=>i for i=1:length(roads))
 value=collect(values(dict))
 
-samp=StatsBase.direct_sample!(value,weights)[1:10] #Example - choosing number of 10 roads
+n=10
+samp=StatsBase.direct_sample!(value,weights)[1:n] #Example - choosing number of 10 roads
 roads[samp] #Sample roads to remove from the graph
 
 
