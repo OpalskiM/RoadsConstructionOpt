@@ -1,5 +1,4 @@
 using StatsBase
-
 using Pkg
 #1. Using OSM tutorial and folium visualisation
 
@@ -21,12 +20,13 @@ for i in 1:10000
     route, route_time = OpenStreetMapX.shortest_route(mx,a,b)
     if route_time < Inf # when we select points neaer edges no route might be found
         push!(routes, route)
-        for n in route
-            if n<2
+       for n in route
+            if n ==route[1]
                 visits[n] = get(visits, n,0)+1
-            else
-                visits[n] = get(visits, n,0)+1  
-                roads_visits[n-1,n]=get(roads_visits, (n-1,n),0)+1   ###Counting visits in every road
+         else
+            x=findall(x->x == n,route)
+            visits[n] = get(visits, n,0)+1  
+               roads_visits[n,route[x[1]-1]]=get(roads_visits, (n,route[x[1]-1]),0)+1
             end
         end
     end                      
