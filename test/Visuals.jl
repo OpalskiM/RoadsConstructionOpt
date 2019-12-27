@@ -1,4 +1,4 @@
-roads #Vector of roads to remove
+routes #Vector of roads to remove
 mx=map_data
 
 #1. Sample roads to remove from the graph.
