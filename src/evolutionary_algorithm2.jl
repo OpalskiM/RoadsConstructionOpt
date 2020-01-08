@@ -28,7 +28,7 @@ end
 #%%
 
 #2. Alternative crossover
-function vswap!(v1::Vector{Tuple{Int,Int}}, v2::Vector{Tuple{Int,Int}}, idx::Int) 
+function vswap!(v1::Vector{Tuple{Int,Int}}, v2::Vector{Tuple{Int,Int}}, idx::Int)
     val = v1[idx]
     v1[idx] = v2[idx]
     v2[idx] = val
@@ -60,7 +60,45 @@ function insertion!(
     population[id] = (NaN, seq)
 end
 
-#4. Changing optimization function
+
+"""
+    optimize2!(
+        sim_data::OpenStreetMapXDES.SimData,
+        λ_ind::Float64,
+        routes::Vector{Tuple{Int,Int}},
+        no_solutions::Int,
+        roadwork_time::Int,
+        no_of_partitions::Int,
+        crossover_rate::Float64,
+        mutation_rate::Float64,
+        elitism::Float64;
+        burning_time::Int = 50,
+        runtime::Int = 20,
+        ϵ = 0.0001,
+        maxiter::Int = 500,
+        toliter::Int = 10,
+        )
+
+TODO Marcin - Describe what function does
+in particular add reference to the paper that has been used to implement it
+
+**Arguments**
+
+* `sim_data` : TODO describe
+* `λ_ind` : TODO describe
+* `routes` : TODO describe
+* `no_solutions` : TODO describe
+* `roadwork_time` : TODO describe
+* `no_of_partitions` : TODO describe
+* `crossover_rate` : TODO describe
+* `mutation_rate` : TODO describe
+* `elitism` : TODO describe
+* `burning_time` : TODO describe
+* `runtime` : TODO describe
+* `ϵ` : TODO describe
+* `maxiter` : TODO describe,
+* `toliter` : TODO describe
+"""
 function optimize2!(
     sim_data::OpenStreetMapXDES.SimData,
     λ_ind::Float64,
@@ -98,9 +136,10 @@ function optimize2!(
             ),
         )
     end
-    @info "First generation done!"
+    @info "First generation done! [thread $(Threads.threadid())]"
     sort!(population)
     (best_fit, best_solution), _ = findmin(population)
+    #println("best_fit=",best_fit)
     (worst_fit, worst_solution), _ = findmax(population)
     #main loop:
     iter = 1
@@ -148,11 +187,15 @@ function optimize2!(
         #convergence
         population = offspring
         sort!(population)
+
         (next_best_fit, next_best_solution), _ = findmin(population)
+        #println("next_best_fit=",next_best_fit)
         (next_worst_fit, next_worst_solution), _ = findmax(population)
         (next_worst_fit > worst_fit) && (worst_fit = next_worst_fit; worst_solution = next_worst_solution)
         δ = abs(next_best_fit - best_fit)
-        best_fit, best_solution = next_best_fit, next_best_solution
+        println("δ=$δ")
+        best_fit= next_best_fit
+        best_solution = deepcopy(next_best_solution)
         if δ < ϵ
             fit_iter > toliter && break
             fit_iter += 1
@@ -161,7 +204,7 @@ function optimize2!(
         end
         iter += 1
         iter >= maxiter && break
-        @info "iteration $iter done"
+        @info "iteration $iter done  [thread $(Threads.threadid())]"
     end
-    return (best_fit=best_fit, best_solution=best_solution, worst_fit=worst_fit, worst_solution=worst_solution)
+    return (best_fit=best_fit, best_solution=best_solution, worst_fit=worst_fit, worst_solution=worst_solution, iter=iter, fit_iter=fit_iter)
 end
