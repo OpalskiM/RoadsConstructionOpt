@@ -1,7 +1,36 @@
-function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, 
+"""
+    optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
+                        routes::Array{Tuple{Int,Int},1}, no_solutions::Int,
+                        roadwork_time::Int, no_of_partitions::Int,
+                        crossover_rate::Float64, mutation_rate::Float64,
+                        elitism::Float64;
+                        burning_time::Int = 50, runtime::Int = 20,
+                        ϵ = 0.0001, maxiter::Int = 500, toliter::Int = 10)
+
+TODO Marcin - Describe what function does
+in particular add reference to the paper that has been used to implement it
+
+**Arguments**
+
+* `sim_data` : TODO describe
+* `λ_ind` : TODO describe
+* `routes` : TODO describe
+* `no_solutions` : TODO describe
+* `roadwork_time` : TODO describe
+* `no_of_partitions` : TODO describe
+* `crossover_rate` : TODO describe
+* `mutation_rate` : TODO describe
+* `elitism` : TODO describe
+* `burning_time` : TODO describe
+* `runtime` : TODO describe
+* `ϵ` : TODO describe
+* `maxiter` : TODO describe,
+* `toliter` : TODO describe
+"""
+function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
                     routes::Array{Tuple{Int,Int},1}, no_solutions::Int,
                     roadwork_time::Int, no_of_partitions::Int,
-                    crossover_rate::Float64, mutation_rate::Float64, 
+                    crossover_rate::Float64, mutation_rate::Float64,
                     elitism::Float64;
                     burning_time::Int = 50, runtime::Int = 20,
                     ϵ = 0.0001, maxiter::Int = 500, toliter::Int = 10)
@@ -16,7 +45,7 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
     for i = 1:no_solutions
          push!(population, get_solution(deepcopy(sim_data),shuffle(routes), reference_times, λ_ind, roadwork_time, no_of_partitions))
     end
-    @info "First generation done!"
+    @info "First generation done! [thread $(Threads.threadid())]"
     sort!(population)
     (best_fit, best_solution), _ = findmin(population)
     (worst_fit, worst_solution), _ = findmax(population)
@@ -28,7 +57,7 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
         offspring = similar(population)
         #mating
         mates = mating(population)
-        offidx = randperm(no_solutions) 
+        offidx = randperm(no_solutions)
         for i = 1:2:no_solutions
             j = i + 1
             if rand() < crossover_rate
@@ -50,8 +79,8 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
         #compute new fitnesses
         for (id, individual) in enumerate(offspring)
             if isnan(individual[1])
-                offspring[id] = get_solution(deepcopy(sim_data),individual[2], 
-                                            reference_times, λ_ind, 
+                offspring[id] = get_solution(deepcopy(sim_data),individual[2],
+                                            reference_times, λ_ind,
                                             roadwork_time, no_of_partitions)
             end
         end
@@ -63,15 +92,15 @@ function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
         (next_worst_fit > worst_fit) && (worst_fit = next_worst_fit; worst_solution =  next_worst_solution)
         δ = abs(next_best_fit - best_fit)
         best_fit, best_solution = next_best_fit, next_best_solution
-        if δ < ϵ  
+        if δ < ϵ
             fit_iter > toliter && break
-            fit_iter += 1 
+            fit_iter += 1
         else
             fit_iter = 1
         end
         iter += 1
         iter >= maxiter && break
-        @info "iteration $iter done"
+        @info "iteration $iter done  [thread $(Threads.threadid())]"
     end
-    return (best_fit=best_fit, best_solution=best_solution, worst_fit=worst_fit, worst_solution=worst_solution)
+    return (best_fit=best_fit, best_solution=best_solution, worst_fit=worst_fit, worst_solution=worst_solution,iter=iter, fit_iter=fit_iter)
 end

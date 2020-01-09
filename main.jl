@@ -3,7 +3,7 @@ using Pkg
 
 #Pkg.add(PackageSpec(url="https://github.com/pszufe/OpenStreetMapXDES.jl", rev="master"))
 
-import OpenStreetMapXDES 
+import OpenStreetMapXDES
 using OpenStreetMapX
 using Random
 
@@ -22,21 +22,24 @@ sim_data = OpenStreetMapXDES.get_sim_data(map_data, N, l);
 
 
 λ_ind = 0.4 #Learning rate
-routes = map_data.e;    #Routes to renovate
+Random.seed!(0);
+routes = shuffle(map_data.e)[1:50];    #Routes to renovate
 no_solutions = 10    #Number of solutions in evolutionary algorithm
-roadwork_time = 10  # approximate length of roadwork of single segment  
+roadwork_time = 10  # approximate length of roadwork of single segment
 no_of_partitions = 5   #number of steps in roadwork process
 crossover_rate = 0.8
 mutation_rate = 0.2
 elitism = 0.1
 
+const alg_methods = [optimize!, optimize2!]
 
-res = NamedTuple[]
-
-for mymethod in [optimize!, optimize2!]
+# in order for the multithreading to work set system vatiable
+#set JULIA_NUM_THREADS=2
+res = Vector{NamedTuple}(undef, length(alg_methods))
+Threads.@threads for m in 1:length(alg_methods)
     sim_data_copy = deepcopy(sim_data)
-    Random.seed!(0);
-    push!(res, mymethod(
+    Random.seed!(m);
+    res[m] = alg_methods[m](
         sim_data_copy,
         λ_ind,
         routes,
@@ -46,6 +49,6 @@ for mymethod in [optimize!, optimize2!]
         crossover_rate,
         mutation_rate,
         elitism;
-        maxiter = 30
-    ))
+        maxiter = 50
+    )
 end
