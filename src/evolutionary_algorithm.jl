@@ -21,11 +21,11 @@ in particular add reference to the paper that has been used to implement it
 * `crossover_rate` : crossover rate of the GA crossover operator 
 * `mutation_rate` : mutation rate of the GA mutation operator
 * `elitism` : elitism rate of the GA
-* `burning_time` : TODO describe
-* `runtime` : TODO describe
+* `burning_time` : number of traffic simulations
+* `runtime` : number of simulations in reference scenario (to compare with optimized solution)
 * `ϵ` : tolerance of single iteration
-* `maxiter` : maximal number of iterations
-* `toliter` : maximal number of iterations not improving the performance
+* `maxiter` : maximal number of iterations of GA
+* `toliter` : maximal number of iterations of GAnot improving the performance (stop criteria)
 """
 function optimize!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64,
                     routes::Array{Tuple{Int,Int},1}, no_solutions::Int,
