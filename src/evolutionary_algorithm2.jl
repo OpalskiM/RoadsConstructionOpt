@@ -84,20 +84,20 @@ in particular add reference to the paper that has been used to implement it
 
 **Arguments**
 
-* `sim_data` : TODO describe
-* `λ_ind` : TODO describe
-* `routes` : TODO describe
-* `no_solutions` : TODO describe
-* `roadwork_time` : TODO describe
-* `no_of_partitions` : TODO describe
-* `crossover_rate` : TODO describe
-* `mutation_rate` : TODO describe
-* `elitism` : TODO describe
-* `burning_time` : TODO describe
-* `runtime` : TODO describe
-* `ϵ` : TODO describe
-* `maxiter` : TODO describe,
-* `toliter` : TODO describe
+* `sim_data` : initally generated artificial population
+* `λ_ind` : learning rate
+* `routes` : array of edges to remove from the graph
+* `no_solutions` : number of solutions
+* `roadwork_time` : approximate length of roadwork of single segment
+* `no_of_partitions` : number of steps in roadwork process
+* `crossover_rate` : crossover rate of the GA crossover operator 
+* `mutation_rate` : mutation rate of the GA mutation operator
+* `elitism` : elitism rate of the GA
+* `burning_time` : number of traffic simulations
+* `runtime` : number of simulations in reference scenario (to compare with optimized solution)
+* `ϵ` : tolerance of single iteration
+* `maxiter` : maximal number of iterations of GA
+* `toliter` : maximal number of iterations of GAnot improving the performance (stop criteria)
 """
 function optimize2!(
     sim_data::OpenStreetMapXDES.SimData,
