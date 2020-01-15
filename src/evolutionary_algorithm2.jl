@@ -1,31 +1,26 @@
 #1. Alternative selection
-function tournament(population::Vector{Tuple{Float64,Vector{Tuple{Int,Int}}}})
-    length(population) <= 0 && error("Population length needs to be positive")
-    fit = [ind[1] for ind in population]
-    cum_p = cumsum(fit ./ sum(fit))
-    mates = zeros(Int, length(population))
-    for i in 1:length(population)
-        contender = unique(rand(1:length(fit), length(population)))
-        while length(contender) < length(population)
-            contender = unique(vcat(
-                contender,
-                rand(1:length(fit), length(population) - length(contender)),
-            ))
-        end
-        winner = first(contender)
-        winnerFitness = fit[winner]
-        for idx in 2:length(population)
-            c = contender[idx]
-            if winnerFitness < fit[c]
-                winner = c
-                winnerFitness = fit[c]
+function tournament(groupSize :: Int,fitness::Array{Tuple{Float64,Array{Tuple{Int64,Int64},1}},1} = population, N::Int64 = length(population))
+        selection = fill(0,N)
+        nFitness = length(fitness)
+        for i in 1:N
+            contender = unique(rand(1:nFitness, groupSize))
+            while length(contender) < groupSize
+                contender = unique(vcat(contender, rand(1:nFitness, groupSize - length(contender))))
             end
+            winner = first(contender)
+            winnerFitness = fitness[winner]
+            for idx = 2:groupSize
+                c = contender[idx]
+                if winnerFitness > fitness[c]
+                    winner = c
+                    winnerFitness = fitness[c]
+                end
+            end
+            selection[i] = winner
         end
-        mates[i] = winner
-    end
-    return mates
+        return selection
+    return tournament
 end
-#%%
 
 #2. Alternative crossover
 function vswap!(v1::Vector{Tuple{Int,Int}}, v2::Vector{Tuple{Int,Int}}, idx::Int)
@@ -151,7 +146,7 @@ function optimize2!(
     while true
         offspring = similar(population)
         #mating
-        mates = tournament(population) ##################### 1. Change (tournament)
+        mates = tournament(1) ##################### 1. Change (tournament)
         offidx = randperm(no_solutions)
         for i in 1:2:no_solutions
             j = i + 1
