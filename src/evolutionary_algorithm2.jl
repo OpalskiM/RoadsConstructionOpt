@@ -81,6 +81,9 @@ end
 
 TODO Marcin - Describe what function does
 in particular add reference to the paper that has been used to implement it
+#optimize2! - function created to find the best solution of roadworks by finding the proper sequence of closures using genetic algorithm
+#References:
+#Mainly article nr 2. but also to some extent: articles 4. and 7. (see: https://github.com/OpalskiM/RoadsConstructionOpt/blob/master/docs/Literature.jl)
 
 **Arguments**
 
