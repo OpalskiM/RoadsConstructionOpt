@@ -47,7 +47,6 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
             DataStructures.dequeue!(sim_flow.sim_clock)
             time_in_system[id] = current_time - start_times[id]
             agent.current_edge = 1
-            
         else
             #otherwise, update his stats and move him forward:
             OpenStreetMapXDES.update_route!(sim_data, sim_flow, agent.route[agent.current_edge], id, current_time) || continue
