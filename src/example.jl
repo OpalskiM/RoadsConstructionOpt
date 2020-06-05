@@ -51,6 +51,6 @@ n=10 #Number of chosen roads
 roadwork_time = 10  # approximate length of roadwork of single segment
 no_of_partitions = 5   #number of steps in roadwork process
     #get reference scenario:
-    reference_times = run_sim!(deepcopy(sim_data), λ_ind, runtime)
+    reference_times = run_sim!(deepcopy(sim_data), λ_ind, iter)
     #generate solution:
     get_solution(deepcopy(sim_data),shuffle(routes), reference_times, λ_ind, roadwork_time, no_of_partitions)
