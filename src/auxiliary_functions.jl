@@ -19,6 +19,7 @@ function calculate_fitness(times, reference)
     sum(times)/length(times)
 end
 
+#function to assess fitness of solution with removed edges from the graph
 function get_solution(sim_data::OpenStreetMapXDES.SimData,routes::Vector{Tuple{Int,Int}},
                     reference_times::Vector{Float64},
                     λ::Float64, roadwork_time::Int, no_of_partitions::Int)
