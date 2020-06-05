@@ -8,7 +8,6 @@ using Statistics
 using Test
 using Random
 using Base.Iterators
-using Memoize
 using StatsBase
 
 #Parameters
@@ -53,12 +52,6 @@ no_of_partitions = 5   #number of steps in roadwork process
     #get reference scenario:
     reference_times = run_sim!(deepcopy(sim_data), λ_ind, iter)
  
+#generate solution 
+get_solution(deepcopy(sim_data),shuffle(routes), reference_times, λ_ind, roadwork_time, no_of_partitions)
 
-#generate solution with simple example of memoising
-solution1=shuffle(routes)
-using Memoize
-@memoize function x(solution1)
-    println("running")
-get_solution(deepcopy(sim_data),solution1, reference_times, λ_ind, roadwork_time, no_of_partitions)
-end
-x(solution1)
