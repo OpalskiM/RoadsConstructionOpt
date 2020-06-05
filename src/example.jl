@@ -28,7 +28,7 @@ sim_data = get_sim_data(map_data,N,l)
  #Running once to count roads_visits
  run_once_init!(sim_data,map_data.g,λ_ind) 
 
-#Choosing roads to remove from the graph
+#Choosing roads to remove from the graph. Drawing n roads in direct probability with the numbers of cars on a particular road
 n=10 #Number of chosen roads
  prob = Dict{Tuple{Int,Int},Real}()
  for k=keys(roads_visits)
