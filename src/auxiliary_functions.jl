@@ -1,3 +1,5 @@
+using OpenStreetMapXDES
+
 function split_sequence(edges::Vector{Tuple{Int,Int}}, k::Int)
     edgs = deepcopy(edges)
     seq = Vector{Tuple{Int,Int}}[]
