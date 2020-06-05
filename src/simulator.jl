@@ -1,3 +1,8 @@
+using OpenStreetMapX
+using OpenStreetMapXDES
+using LightGraphs
+using SparseArrays
+
 #Functions to remove edges and rerouting
 function remove_edges(m::OpenStreetMapX.MapData,edgelist::Array{Tuple{Int,Int},1})
     g = deepcopy(m.g)
