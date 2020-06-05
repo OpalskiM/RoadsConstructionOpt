@@ -1,4 +1,6 @@
+using OpenStreetMapX
 using OpenStreetMapXDES
+using LightGraphs
 
 function split_sequence(edges::Vector{Tuple{Int,Int}}, k::Int)
     edgs = deepcopy(edges)
