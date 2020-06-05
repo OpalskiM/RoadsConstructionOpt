@@ -12,12 +12,11 @@ using Memoize
 using StatsBase
 
 #Parameters
-N = 1000;
-iter = 10;
-λ_ind = 0.4;
-l = 5.0;
-burning_time=50
-runtime=20
+N = 1000; #Number of agents
+iter = 10; #Number of iterations
+λ_ind = 0.4; #learning rate
+l = 5.0; #vehicle' length
+
 
 #exemplary path, generating environment
 pth = "C:/Users/opals/Documents/AKTUALNE"
