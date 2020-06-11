@@ -1,9 +1,3 @@
-using OpenStreetMapX
-using OpenStreetMapXDES
-using LightGraphs
-using SparseArrays
-
-#Functions to remove edges and rerouting
 function remove_edges(m::OpenStreetMapX.MapData,edgelist::Array{Tuple{Int,Int},1})
     g = deepcopy(m.g)
     for edge in edgelist
@@ -14,7 +8,7 @@ end
 
 function new_graph_routing(m::OpenStreetMapX.MapData,
                             g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing},
-                            w::SparseArrays.SparseMatrixCSC{Float64,Int}, 
+                            w::SparseArrays.SparseMatrixCSC{Float64,Int},
                             v0::Int, v1::Int)
     heuristic(u,v) = OpenStreetMapX.get_distance(u, v, m.nodes, m.n)
     isa(g, Nothing) && (g = m.g)
@@ -23,13 +17,11 @@ function new_graph_routing(m::OpenStreetMapX.MapData,
 end
 
 #Sim main functions
-
-function run_once!(sim_data::OpenStreetMapXDES.SimData, 
-                    g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing},
-                    λ_ind::Float64)
+function run_once!(sim_data::OpenStreetMapXDES.SimData,
+                    g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing})
     #initialize sim:
-    sim_flow = OpenStreetMapXDES.ControlFlow(sim_data)
-    stats = OpenStreetMapXDES.Stats(size(sim_data.map_data.w)[1], size(sim_data.map_data.w)[2])
+    sim_flow = ControlFlow(sim_data)
+    stats = Stats(size(sim_data.map_data.w)[1], size(sim_data.map_data.w)[2])
     start_times = deepcopy(sim_flow.sim_clock)
     time_in_system = zeros(length(sim_data.population))
     current_time = -Inf
@@ -37,29 +29,29 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
     while !isempty(sim_flow.sim_clock)
         id, time = DataStructures.peek(sim_flow.sim_clock)
         #if no one can move unclog model:
-        if time == Inf 
-            OpenStreetMapXDES.unclog!(sim_data, sim_flow, stats, current_time, λ_ind)
+        if time == Inf
+            unclog!(sim_data, sim_flow, stats, current_time) 
             continue
         end
         current_time = time
         agent = sim_data.population[id]
         #if agent finish his route, remove him from model:
         if agent.current_edge > length(agent.route)
-            agent.current_edge != 1 && OpenStreetMapXDES.update_previous_edge!(sim_data, sim_flow, 
+            agent.current_edge != 1 && update_previous_edge!(sim_data, sim_flow,
                                                             agent.route[agent.current_edge - 1],
-                                                            stats, current_time, λ_ind)
+                                                            stats, current_time) 
             push!(stats.delays, current_time)
             DataStructures.dequeue!(sim_flow.sim_clock)
             time_in_system[id] = current_time - start_times[id]
             agent.current_edge = 1
         else
             #otherwise, update his stats and move him forward:
-            OpenStreetMapXDES.update_route!(sim_data, sim_flow, agent.route[agent.current_edge], id, current_time) || continue
-            OpenStreetMapXDES.update_control_flow!(sim_data, sim_flow, agent.route[agent.current_edge],
-                                stats, id, λ_ind, current_time)   
-            agent.current_edge > 2 && OpenStreetMapXDES.update_previous_edge!(sim_data,sim_flow, 
+update_route!(sim_data, sim_flow, agent.route[agent.current_edge], id, current_time) || continue 
+        update_control_flow!(sim_data, sim_flow, agent.route[agent.current_edge],
+                                stats, id, current_time)   
+            agent.current_edge > 2 && update_previous_edge!(sim_data,sim_flow,
                                                             agent.route[agent.current_edge - 2],
-                                                            stats, current_time, λ_ind)
+                                                            stats, current_time)
         end
     end
     for agent in sim_data.population
@@ -70,11 +62,13 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
     time_in_system
 end
 
-function run_sim!(sim_data::OpenStreetMapXDES.SimData, λ_ind::Float64, iter::Int,
+
+function run_sim!(sim_data::OpenStreetMapXDES.SimData, iter::Int,
                 g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing} = nothing)
     res = zeros(length(sim_data.population))
     for i = 1:iter
-        res .+= run_once!(sim_data, g, λ_ind)
+        res .+= run_once!(sim_data, g)
     end
     res ./ iter
 end
+
