@@ -13,7 +13,7 @@ using Parameters
 
 include("types.jl")
 include("simulation_functions.jl")
-include("symulacja_potrzebna.jl")
+include("simulator.jl")
 include("parameters.jl")
 
 @unpack N,iter,l,roadwork_time,no_of_partitions,n = ModelSettings(1000,20,5.0,1,5,10)
