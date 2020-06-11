@@ -27,6 +27,6 @@ routes = renovated_roads(map_data,n) ##Randomly chosen n roads to renovate
 
 #get reference scenario:
 reference_times = run_sim!(deepcopy(sim_data), iter)
-#generate solution
+#generate solution - compare graph with removed edges with reference scenario
 get_solution(deepcopy(sim_data),routes, reference_times, roadwork_time, no_of_partitions)
 
