@@ -16,17 +16,22 @@ include("simulation_functions.jl")
 include("simulator.jl")
 include("parameters.jl")
 
-@unpack N,iter,l,roadwork_time,no_of_partitions,n = ModelSettings(1000,20,5.0,1,5,10)
+@unpack N,iter,l = ModelSettings(10000,20,5.0)
 
 pth = "C:/Users/opals/Documents/AKTUALNE" ###exemplary map
-name = "skierniewice.osm"
+name = "reno_east3.osm"
 
 map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
 sim_data = get_sim_data(map_data,N,l)
-routes = renovated_roads(map_data,n) ##Randomly chosen n roads to renovate
 
-#get reference scenario:
+#get reference scenario, with no roadworks
 reference_times = run_sim!(deepcopy(sim_data), iter)
-#generate solution - compare graph with removed edges with reference scenario
-get_solution(deepcopy(sim_data),routes, reference_times, roadwork_time, no_of_partitions)
 
+m=deepcopy(map_data) #creating a copy of map_data
+s=deepcopy(sim_data) #creating a copy of sim_data
+include("Removing_edges.jl")
+
+#creating solution for scenario with roadworks
+@time Solution = run_sim!(s,iter)
+
+#Alternatively there is a possibility to use get_solution! function and involve roadwork_time and no_of_partitions parameters
