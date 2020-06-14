@@ -173,8 +173,3 @@ function get_solution(sim_data::OpenStreetMapXDES.SimData,routes::Vector{Tuple{I
     res /= no_of_partitions
     (calculate_fitness(res,reference_times),routes)
 end
-
-#function to randomly draw n roads to renovate 
-function renovated_roads(m::OpenStreetMapX.MapData,n::Int)
-    sample(m.e,n)
-end
