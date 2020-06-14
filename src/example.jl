@@ -34,4 +34,3 @@ include("Removing_edges.jl")
 #creating solution for scenario with roadworks
 @time Solution = run_sim!(s,iter)
 
-#Alternatively there is a possibility to use get_solution! function and involve roadwork_time and no_of_partitions parameters
