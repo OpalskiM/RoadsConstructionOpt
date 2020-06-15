@@ -1,7 +1,6 @@
 module RoadsConstructionOpt
 
 using OpenStreetMapX
-import OpenStreetMapXDES 
 using LightGraphs
 using SparseArrays
 using DataStructures
@@ -12,11 +11,7 @@ using Random
 using Base.Iterators
 
 include("simulator.jl")
-include("evolutionary_algorithm.jl")
-include("evolutionary_algorithm2.jl")
-include("evolutionary_functions.jl")
 
-export optimize!, optimize2!
 export run_sim!
 export get_solution
 

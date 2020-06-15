@@ -23,6 +23,7 @@ function update_stats!(stats::Stats, edge0::Int, edge1::Int, driving_time::Float
     stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.cars_count[edge0, edge1]
 end
 
+#=
 function update_beliefs!(agent::OpenStreetMapXDES.Agent, edge0::Int, edge1::Int,
                         driving_time::Float64)
     agent.expected_driving_times[edge0, edge1] += (driving_time - agent.expected_driving_times[edge0, edge1])
@@ -39,18 +40,20 @@ function ControlFlow(sim_data::OpenStreetMapXDES.SimData)
     end
     ControlFlow(edges,queue)
 end
+=#
 
 function departure_time(w::AbstractMatrix{Float64}, route::Array{Tuple{Int64,Int64},1})
     isempty(route) ? (driving_time = 0) : (driving_time = sum(w[edge[1],edge[2]] for edge in route))
     return -driving_time
 end
 
+#=
 function update_control_flow!(sim_data::OpenStreetMapXDES.SimData, sim_flow::ControlFlow, edge::Tuple{Int,Int},
                             stats::Stats, id::Int, current_time::Float64,
                             waiting_time::Float64 = 0.0)
     agent = sim_data.population[id]
     driving_time = calculate_driving_time(sim_flow.edges[edge].cars_count,
-                                        sim_data.max_densities[edge],
+                                     sim_data.max_densities[edge],
                                         sim_data.map_data.w[edge],
                                         sim_data.velocities[edge])
     update_beliefs!(agent,edge[1], edge[2], driving_time + waiting_time)
@@ -62,6 +65,7 @@ end
 
 function new_route!(sim_data::OpenStreetMapXDES.SimData, agent::OpenStreetMapXDES.Agent, edge::Tuple{Int,Int})
     if agent.current_edge != 1
+
         route = [agent.route[agent.current_edge - 1], (edge[1], edge[2]),]
         agent.current_edge = 2
     else
@@ -72,6 +76,7 @@ function new_route!(sim_data::OpenStreetMapXDES.SimData, agent::OpenStreetMapXDE
                         sim_data.driving_times + agent.expected_driving_times,
                         edge[2], agent.fin_node))
 end
+
 
 function update_route!(sim_data::OpenStreetMapXDES.SimData, sim_flow::ControlFlow,
                         edge::Tuple{Int,Int}, id::Int, time::Float64)
@@ -141,3 +146,4 @@ function unclog!(sim_data::OpenStreetMapXDES.SimData, sim_flow::ControlFlow,
         end
     end
 end
+=#

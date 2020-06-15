@@ -1,5 +1,4 @@
 using OpenStreetMapX
-using OpenStreetMapXDES
 using LightGraphs
 using SparseArrays
 using DataStructures
@@ -16,9 +15,9 @@ include("simulation_functions.jl")
 include("simulator.jl")
 include("parameters.jl")
 
-@unpack N,iter,l = ModelSettings(10000,20,5.0)
+const p = ModelSettings(10000,20,5.0)
 
-pth = "C:/Users/opals/Documents/AKTUALNE" ###exemplary map
+pth = joinpath(dirname(pathof(OpenStreetMapX)),"..","test","data")###exemplary map
 name = "reno_east3.osm"
 
 map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
@@ -33,4 +32,3 @@ include("Removing_edges.jl")
 
 #creating solution for scenario with roadworks
 @time Solution = run_sim!(s,iter)
-
