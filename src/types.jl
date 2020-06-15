@@ -11,7 +11,7 @@ mutable struct SimData
 	driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64}
 	velocities::SparseArrays.SparseMatrixCSC{Float64,Int64}
 	max_densities::SparseArrays.SparseMatrixCSC{Float64,Int64}
-	population::Array{Agent,1}
+	population::Vector{Agent}
 end
 
 mutable struct FlowData

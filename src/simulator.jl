@@ -16,8 +16,9 @@ function new_graph_routing(m::OpenStreetMapX.MapData,
     [(route_indices[j - 1],route_indices[j]) for j = 2:length(route_indices)]
 end
 
+#=
 #Sim main functions
-function run_once!(sim_data::OpenStreetMapXDES.SimData,
+function run_once!(sim_data::SimData,
                     g::Union{LightGraphs.SimpleDiGraph{Int}, Nothing})
     #initialize sim:
     sim_flow = ControlFlow(sim_data)
@@ -30,7 +31,7 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
         id, time = DataStructures.peek(sim_flow.sim_clock)
         #if no one can move unclog model:
         if time == Inf
-            unclog!(sim_data, sim_flow, stats, current_time) 
+            unclog!(sim_data, sim_flow, stats, current_time)
             continue
         end
         current_time = time
@@ -39,16 +40,16 @@ function run_once!(sim_data::OpenStreetMapXDES.SimData,
         if agent.current_edge > length(agent.route)
             agent.current_edge != 1 && update_previous_edge!(sim_data, sim_flow,
                                                             agent.route[agent.current_edge - 1],
-                                                            stats, current_time) 
+                                                            stats, current_time)
             push!(stats.delays, current_time)
             DataStructures.dequeue!(sim_flow.sim_clock)
             time_in_system[id] = current_time - start_times[id]
             agent.current_edge = 1
         else
             #otherwise, update his stats and move him forward:
-update_route!(sim_data, sim_flow, agent.route[agent.current_edge], id, current_time) || continue 
+update_route!(sim_data, sim_flow, agent.route[agent.current_edge], id, current_time) || continue
         update_control_flow!(sim_data, sim_flow, agent.route[agent.current_edge],
-                                stats, id, current_time)   
+                                stats, id, current_time)
             agent.current_edge > 2 && update_previous_edge!(sim_data,sim_flow,
                                                             agent.route[agent.current_edge - 2],
                                                             stats, current_time)
@@ -71,4 +72,4 @@ function run_sim!(sim_data::OpenStreetMapXDES.SimData, iter::Int,
     end
     res ./ iter
 end
-
+=#
