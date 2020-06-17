@@ -26,6 +26,12 @@ function get_nodes(m::OpenStreetMapX.MapData)
     return start_node,fin_node
 end
 
+function get_route(m::OpenStreetMapX.MapData, w::AbstractMatrix{Float64}, node0::Int64,  node1::Int64)
+    f(x, B = agent.fin_node, nodes = m.nodes, vertices = m.n) = OpenStreetMapX.get_distance(x,B,nodes,vertices)/(maximum(values(OpenStreetMapX.SPEED_ROADS_URBAN))/3.6)
+    route_indices, route_values = OpenStreetMapX.a_star_algorithm(m.g, node0, node1, w, f)
+	[(route_indices[j - 1],route_indices[j]) for j = 2:length(route_indices)]
+end
+
 function create_agents(m::OpenStreetMapX.MapData,
                         w::SparseArrays.SparseMatrixCSC{Float64,Int64},
                         N::Int64)
@@ -48,12 +54,6 @@ function create_agents(m::OpenStreetMapX.MapData,
         end
     end
     return reduce(vcat,[buffer[k] for k in nodes_list])
-end
-
-function get_route(m::OpenStreetMapX.MapData, w::AbstractMatrix{Float64}, node0::Int64,  node1::Int64)
-    f(x, B = agent.fin_node, nodes = m.nodes, vertices = m.n) = OpenStreetMapX.get_distance(x,B,nodes,vertices)/(maximum(values(OpenStreetMapX.SPEED_ROADS_URBAN))/3.6)
-    route_indices, route_values = OpenStreetMapX.a_star_algorithm(m.g, node0, node1, w, f)
-	[(route_indices[j - 1],route_indices[j]) for j = 2:length(route_indices)]
 end
 
 function get_sim_data(m::OpenStreetMapX.MapData,
@@ -89,9 +89,5 @@ end
 function update_stats!(stats::Stats, edge0::Int, edge1::Int, driving_time::Float64)
     stats.cars_count[edge0, edge1] += 1.0
     stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.cars_count[edge0, edge1]
-end
-
-function departure_time(w::AbstractMatrix{Float64}, route::Array{Tuple{Int64,Int64},1})
-    isempty(route) ? (driving_time = 0) : (driving_time = sum(w[edge[1],edge[2]] for edge in route))
-    return -driving_time
+	stats.actual_driving_times[edge0,edge1] = driving_time
 end
