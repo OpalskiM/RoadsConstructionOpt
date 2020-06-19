@@ -23,7 +23,6 @@ function plot_edge_load(map::OpenStreetMapX.OSMData, mData::MapData, cars_per_ed
     cmap = matplotlib_cm.get_cmap("prism")
     m = flm.Map(tiles="Stamen Toner")
     for e in mData.e
-        #cars_per_edge=stats.vehicle_load
         colix = cars_per_edge[map_data.v[e[1]],map_data.v[e[2]]]
         if !haskey(map.nodes, e[1]) || !haskey(map.nodes, e[2])
             continue
