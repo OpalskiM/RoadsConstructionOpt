@@ -87,7 +87,8 @@ function calculate_driving_time(n_e::Float64,
 end
 
 function update_stats!(stats::Stats, edge0::Int, edge1::Int, driving_time::Float64)
-    stats.cars_count[edge0, edge1] += 1.0
-    stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.cars_count[edge0, edge1]
+    stats.vehicle_load[edge0, edge1] += 1.0
+    stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.vehicle_load[edge0, edge1]
 	stats.actual_driving_times[edge0,edge1] = driving_time
 end
+
