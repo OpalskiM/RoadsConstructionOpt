@@ -14,7 +14,7 @@ mutable struct SimData
 end
 
 mutable struct Stats
-	cars_count::SparseArrays.SparseMatrixCSC{Float64,Int64}
+	vehicle_load::SparseArrays.SparseMatrixCSC{Float64,Int64}
 	avg_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64}
 	actual_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64} #latest travel time on the edge.
 end
