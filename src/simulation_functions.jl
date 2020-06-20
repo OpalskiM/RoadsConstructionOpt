@@ -1,5 +1,6 @@
-function get_max_densities(m::OpenStreetMapX.MapData,
-                            l::Float64)
+
+function get_max_densities(m::MapData,
+                            vehicle_len::Float64)
     roadways_lanes = Dict{Int64,Int64}()
     for roadway in m.roadways
         if !OpenStreetMapX.haslanes(roadway)
@@ -11,13 +12,14 @@ function get_max_densities(m::OpenStreetMapX.MapData,
     end
     segments = OpenStreetMapX.find_segments(m.nodes,m.roadways,m.intersections)
     segments = Dict((m.v[segment.node0],m.v[segment.node1]) => roadways_lanes[segment.parent] for segment in segments)
-    lanes_matrix = SparseArrays.sparse(map(x->getfield.(collect(keys(segments)), x), fieldnames(eltype(collect(keys(segments)))))...,
-	collect(values(segments)),
-	length(m.v),length(m.v))
+    lanes_matrix = SparseArrays.sparse(
+		map(x->getfield.(collect(keys(segments)), x), fieldnames(eltype(collect(keys(segments)))))...,
+		collect(values(segments)),
+		length(m.v),length(m.v))
     return m.w .* lanes_matrix / l
 end
 
-function get_nodes(m::OpenStreetMapX.MapData)
+function get_nodes(m::MapData)
     start_node, fin_node = 0, 0
     while start_node == fin_node
         start_node = m.v[OpenStreetMapX.point_to_nodes(OpenStreetMapX.generate_point_in_bounds(m), m)]
@@ -32,9 +34,9 @@ function get_route(m::OpenStreetMapX.MapData, w::AbstractMatrix{Float64}, node0:
 	[(route_indices[j - 1],route_indices[j]) for j = 2:length(route_indices)]
 end
 
-function create_agents(m::OpenStreetMapX.MapData,
+function create_agents(m::MapData,
                         w::SparseArrays.SparseMatrixCSC{Float64,Int64},
-                        N::Int64)
+                        N::Int64)::Vector{Agent}
     buffer = Dict{Tuple{Int64,Int64}, Vector{Agent}}()
     nodes_list = Tuple{Int64,Int64}[]
     for i = 1:N
@@ -42,6 +44,10 @@ function create_agents(m::OpenStreetMapX.MapData,
         if i % 2000 == 0
             @info "$i agents created"
         end
+
+		# TODO when agents are created buffer is empty
+		# TODO the buffe is not needed at all - we are using actual_driving_times instead!
+		# TODO henece all this code should be reedited
         if !haskey(buffer,nodes)
             route = get_route(m, w, nodes[1], nodes[2])
             agent = Agent(nodes[1], nodes[2],
@@ -56,13 +62,15 @@ function create_agents(m::OpenStreetMapX.MapData,
     return reduce(vcat,[buffer[k] for k in nodes_list])
 end
 
-function get_sim_data(m::OpenStreetMapX.MapData,
-                    N::Int64,
-					l::Float64,
+function get_sim(m::MapData,
+                    p::ModelSettings,
                     speeds = OpenStreetMapX.SPEED_ROADS_URBAN)::SimData
+	# TODO this value should be from the beginning be calculated using the formula
+	# TODO `calculate_driving_time()`
     driving_times = OpenStreetMapX.create_weights_matrix(m, OpenStreetMapX.network_travel_times(m, speeds))
+	# TODO make sure that this is used as the defauklt velocities (without traffic)
     velocities = OpenStreetMapX.get_velocities(m, speeds)
-	max_densities = get_max_densities(m, l)
+	max_densities = get_max_densities(m, p.l)
     agents = create_agents(m, driving_times, N)
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
@@ -87,8 +95,10 @@ function calculate_driving_time(n_e::Float64,
 end
 
 function update_stats!(stats::Stats, edge0::Int, edge1::Int, driving_time::Float64)
+	# TODO : this should be a sparse array of `Int`s not `Float64`s!
     stats.vehicle_load[edge0, edge1] += 1.0
-    stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.vehicle_load[edge0, edge1]
+	# TODO : use here https://github.com/joshday/OnlineStats.jl  `] add OnlineStats` to update the statistics
+	stats.avg_driving_times[edge0, edge1] += (driving_time - stats.avg_driving_times[edge0, edge1])/stats.vehicle_load[edge0, edge1]
+	# TODO : the new driving time should be calculated in this line
 	stats.actual_driving_times[edge0,edge1] = driving_time
 end
-

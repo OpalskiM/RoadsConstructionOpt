@@ -1,20 +1,10 @@
-using Conda
-Conda.runconda(`install folium -c conda-forge`)
-Conda.runconda(`install matplotlib`)
+
 
 function GetLLOfPoint2(map::OpenStreetMapX.OSMData, mData::MapData,n::Int64)
     latitude = map.nodes[n].lat
     longitude = map.nodes[n].lon
     mypoint = (latitude,longitude)
 end
-
-using PyCall
-
-#Creating Data
-cars_per_edge = stats.vehicle_load 
-map_file_path = joinpath(dirname(pathof(OpenStreetMapX)),"..","test/data/reno_east3.osm")
-mapa=OpenStreetMapX.parseOSM(map_file_path) #creating OSM file
-mData = deepcopy(map_data)
 
 function plot_edge_load(map::OpenStreetMapX.OSMData, mData::MapData, cars_per_edge)
     flm = pyimport("folium")
@@ -38,5 +28,4 @@ function plot_edge_load(map::OpenStreetMapX.OSMData, mData::MapData, cars_per_ed
     flm.Rectangle(MAP_BOUNDS, color="black",weight=6).add_to(m)
     m.fit_bounds(MAP_BOUNDS)
     m.save("EdgeLoads.html")
-
-plot_edge_load(mapa,mData,cars_per_edge)
+end
