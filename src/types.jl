@@ -14,9 +14,9 @@ end
 end
 
 @with_kw mutable struct Stats
-	vehicle_load::SparseArrays.SparseMatrixCSC{Int64,Int64} #1/10
+	vehicle_load::SparseArrays.SparseMatrixCSC{Int64,Int64}
 	actual_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64} #latest travel time on the edge.
-	simulation_total_time::Float64
+	simulation_total_time::Float64 #total agents' simulation travel time in simulation
 end
 
 Stats(m::Int,n::Int) = Stats(SparseArrays.spzeros(m, n),SparseArrays.spzeros(m, n),0.0)
