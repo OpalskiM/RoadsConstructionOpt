@@ -54,7 +54,7 @@ calculate_driving_time(n_e::Float64,N_e::Float64,d::Float64,V_max::Float64, V_mi
 * `v_min`               : minimum commuter's velocity at en edge e
 """
 
-function calculate_driving_time(n_e::Float64,
+function calculate_driving_time(n_e::Int64,
                                 N_e::Float64,
                                 d::Float64,
                                 V_max::Float64,
