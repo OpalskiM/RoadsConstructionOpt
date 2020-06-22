@@ -1,5 +1,3 @@
-
-
 function GetLLOfPoint2(map::OpenStreetMapX.OSMData, mData::MapData,n::Int64)
     latitude = map.nodes[n].lat
     longitude = map.nodes[n].lon
@@ -22,10 +20,14 @@ function plot_edge_load(map::OpenStreetMapX.OSMData, mData::MapData, cars_per_ed
         info =  "From: Node $(e[1])\n<br>" *
                 "To: Node $(e[2])\n<br>" *
                 "Load: $(colix)"
-        flm.PolyLine([p1,p2], popup=info,tooltip=info, color="#$(hex(cols[colix]))", weight=round(Int,log(21*colix))+1, opacity=1).add_to(m)
+                if colix >0
+        flm.PolyLine([p1,p2], popup=info,tooltip=info, weight=round(Int,log(21*colix))+1, opacity=1).add_to(m)
+    #color="#$(hex(cols[colix]))"
+end
     end
     MAP_BOUNDS = [(mData.bounds.min_y,mData.bounds.min_x),(mData.bounds.max_y,mData.bounds.max_x)]
     flm.Rectangle(MAP_BOUNDS, color="black",weight=6).add_to(m)
     m.fit_bounds(MAP_BOUNDS)
     m.save("EdgeLoads.html")
+    m
 end
