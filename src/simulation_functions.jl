@@ -105,6 +105,6 @@ end
 
 function update_stats!(stats::Stats, edge0::Int, edge1::Int)
     stats.vehicle_load[edge0, edge1] += 1.0
-    stats.actual_driving_times[edge0,edge1] = calculate_driving_time(stats.vehicle_load[edge0,edge1],sim_data.max_densities[edge0,edge1],sim_data.map_data.w[edge0,edge1],sim_data.velocities[edge0,edge1])
+    stats.actual_driving_times[edge0,edge1] = calculate_driving_time(stats.vehicle_load[edge0,edge1],sim.max_densities[edge0,edge1],sim.map_data.w[edge0,edge1],sim.velocities[edge0,edge1])
     stats.simulation_total_time += stats.actual_driving_times[edge0,edge1] 
 end
