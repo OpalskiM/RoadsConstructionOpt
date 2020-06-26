@@ -11,6 +11,7 @@ using Random
 using Base.Iterators
 using PyCall
 using Parameters
+using Colors
 
 include("types.jl")
 include("parameters.jl")

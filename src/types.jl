@@ -19,4 +19,4 @@ end
 	simulation_total_time::Float64 #total agents' simulation travel time in simulation
 end
 
-Stats(m::Int,n::Int) = Stats(SparseArrays.spzeros(m, n),SparseArrays.spzeros(m, n),0.0)
+Stats(m::Int,n::Int) = Stats(SparseArrays.spzeros(Int, m, n),SparseArrays.spzeros(m, n),0.0)
