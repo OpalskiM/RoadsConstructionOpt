@@ -95,16 +95,16 @@ function get_sim(m::MapData, p::ModelSettings, speeds = OpenStreetMapX.SPEED_ROA
 	max_densities = get_max_densities(m, p.vehicle_len)
 	a, b = size(m.w)
 	driving_times=SparseArrays.spzeros(a,b)
-for edge in m.e
-  driving_times[m.v[edge[1]],m.v[edge[2]]] = calculate_driving_time(0, max_densities[m.v[edge[1]],m.v[edge[2]]],map_data.w[m.v[edge[1]],m.v[edge[2]]],velocities[m.v[edge[1]],m.v[edge[2]]])
-   end
+	for edge in m.e
+  		driving_times[m.v[edge[1]],m.v[edge[2]]] = calculate_driving_time(0, max_densities[m.v[edge[1]],m.v[edge[2]]],m.w[m.v[edge[1]],m.v[edge[2]]],velocities[m.v[edge[1]],m.v[edge[2]]])
+   	end
     agents = create_agents(m, driving_times,p.N)
     return SimData(m, driving_times, velocities, max_densities, agents)
 end
 
 
-function update_stats!(stats::Stats, edge0::Int, edge1::Int)
-    stats.vehicle_load[edge0, edge1] += 1.0
+function update_stats!(stats::Stats, sim::SimData, edge0::Int, edge1::Int)
+    stats.vehicle_load[edge0, edge1] += 1
     stats.actual_driving_times[edge0,edge1] = calculate_driving_time(stats.vehicle_load[edge0,edge1],sim.max_densities[edge0,edge1],sim.map_data.w[edge0,edge1],sim.velocities[edge0,edge1])
-    stats.simulation_total_time += stats.actual_driving_times[edge0,edge1] 
+    stats.simulation_total_time += stats.actual_driving_times[edge0,edge1]
 end
