@@ -19,3 +19,6 @@ sim = get_sim(map_data,p)
 stats = run_simulation!(sim)
 
 RoadsConstructionOpt.plot_edge_load(map_data,stats)
+
+#Plot with removed roads
+RoadConstructionOpt.plot_edge_load_removed(map_data,stats,roads)
