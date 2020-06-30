@@ -21,4 +21,16 @@ stats = run_simulation!(sim)
 RoadsConstructionOpt.plot_edge_load(map_data,stats)
 
 #Plot with removed roads
-RoadConstructionOpt.plot_edge_load_removed(map_data,stats,roads)
+include("Removed_edges.jl")
+RoadConstructionOpt.plot_edge_load_removed(map_data,stats,roads) #Removed roads colored green
+
+#Optimisation Roadworks
+include("Roadworks.jl")
+"
+function get_solution(
+sim::SimData 
+roads::Array{Any,1} - Roads to renovate
+reference_time::Float64 - benchmark time (total time of simulation without roadworks)
+no_of_partitions::Int) - number of roadworks batches (time of each roadwork set to 1)
+"
+get_solution(sim,roads,reference_time,5)
