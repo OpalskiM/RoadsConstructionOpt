@@ -26,11 +26,12 @@ RoadConstructionOpt.plot_edge_load_removed(map_data,stats,roads) #Removed roads 
 
 #Optimisation Roadworks
 include("Roadworks.jl")
-"
-function get_solution(
-sim::SimData 
-roads::Array{Any,1} - Roads to renovate
-reference_time::Float64 - benchmark time (total time of simulation without roadworks)
-no_of_partitions::Int) - number of roadworks batches (time of each roadwork set to 1)
-"
+"""
+function get_solution(sim::SimData, roads::Array{Any,1},reference_time::Float64,no_of_partitions::Int)
+**Arguments**
+*'sim' - Sim Data
+*'roads' - Roads to renovate
+*'reference_time' - benchmark time (total time of simulation without roadworks)
+*'no_of_partitions' - number of roadworks batches (time of each roadwork set to 1)
+"""
 get_solution(sim,roads,reference_time,5)
