@@ -18,7 +18,6 @@ include("parameters.jl")
 include("simulation_functions.jl")
 include("simulator.jl")
 include("visuals.jl")
-include("Removed_edges.jl")
 
 export get_sim, run_simulation!
 export ModelSettings, Agent, Stats, SimData
