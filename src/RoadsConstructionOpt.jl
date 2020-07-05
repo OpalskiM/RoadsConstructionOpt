@@ -18,10 +18,14 @@ include("parameters.jl")
 include("simulation_functions.jl")
 include("simulator.jl")
 include("visuals.jl")
+include("removed_edges.jl")
+include("roadworks.jl")
 
 export get_sim, run_simulation!
 export ModelSettings, Agent, Stats, SimData
 export plot_edge_load, plot_edge_load_removed
+export top_congested_roads
+export get_solution, split_sequence, remove_edges
 
 
 end # module
