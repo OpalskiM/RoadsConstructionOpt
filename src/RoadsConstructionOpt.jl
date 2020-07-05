@@ -21,5 +21,7 @@ include("visuals.jl")
 
 export get_sim, run_simulation!
 export ModelSettings, Agent, Stats, SimData
+export plot_edge_load, plot_edge_load_removed
+
 
 end # module

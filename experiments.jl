@@ -10,20 +10,19 @@ using RoadsConstructionOpt
 
 const p = ModelSettings(N=1000)
 
-pth = joinpath(dirname(pathof(OpenStreetMapX)),"..","test","data")###exemplary map
-name = "reno_east3.osm"
+pth = joinpath(dirname(pathof(OpenStreetMapX)),"..","test","data","reno_east3.osm")
 
-map_data =  OpenStreetMapX.get_map_data(pth,name,use_cache = false);
+@time map_data =  get_map_data(pth;use_cache = false, trim_to_connected_graph=true );
 sim = get_sim(map_data,p)
 
 stats = run_simulation!(sim)
 
-RoadsConstructionOpt.plot_edge_load(map_data,stats)
+plot_edge_load(map_data,stats)
 
 #1)
 #Plot with removed roads
 #include("Removed_edges.jl")
-#RoadConstructionOpt.plot_edge_load_removed(map_data,stats,roads) #Removed roads colored green
+plot_edge_load_removed(map_data,stats,roads) #Removed roads colored green
 
 #2)
 # Optimisation Roadworks
