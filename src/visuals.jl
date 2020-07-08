@@ -3,7 +3,7 @@ function GetLLOfPoint2(mData::MapData,n::Int64)
     mypoint = (point.lat,point.lon)
 end
 
-function plot_edge_load(mData::MapData, stats::Stats)
+function plot_edge_load(mData::MapData, stats::Stats; out_file="EdgeLoads.html")
     flm = pyimport("folium")
     matplotlib_cm = pyimport("matplotlib.cm")
     matplotlib_colors = pyimport("matplotlib.colors")
@@ -33,6 +33,6 @@ function plot_edge_load(mData::MapData, stats::Stats)
     MAP_BOUNDS = [(mData.bounds.min_y,mData.bounds.min_x),(mData.bounds.max_y,mData.bounds.max_x)]
     flm.Rectangle(MAP_BOUNDS, color="black",weight=6).add_to(m)
     m.fit_bounds(MAP_BOUNDS)
-    m.save("EdgeLoads.html")
+    m.save(out_file)
     m
 end

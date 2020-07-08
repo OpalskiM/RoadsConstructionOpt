@@ -1,5 +1,6 @@
 # RoadsConstructionOpt
-Optimization of road network within V2I communication
+Agent-based Simulator for optimization of road network construction works
+
 
 **Documentation**
 
@@ -18,6 +19,6 @@ Plotting road system requires `Conda`'s folium and matplotlib to be present in J
 
 ```julia
 using Conda
-Conda.runconda(`install folium -c conda-forge`)
-Conda.runconda(`install matplotlib`)
+Conda.runconda(`install folium -c conda-forge --yes`)
+Conda.runconda(`install matplotlib --yes`)
 ```
