@@ -73,9 +73,6 @@ function create_agents(m::MapData,
         if i % 2000 == 0
             @info "$i agents created"
         end
-		# TODO when agents are created buffer is empty
-		# TODO the buffe is not needed at all - we are using actual_driving_times instead!
-		# TODO henece all this code should be reedited
         if !haskey(buffer,nodes)
             route = get_route(m, w, nodes[1], nodes[2])
             agent = Agent(nodes[1], nodes[2],
