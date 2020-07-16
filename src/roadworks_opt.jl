@@ -20,7 +20,7 @@ as any permutation of periods has exactly the same evaluation.
 * `reference_time`: reference time (without roadworks)
 """
 
-function opt(f::Function, T::Int, z::Int, maxiter::Int, p::Float64, presolve::Bool, roads =roads, sim = sim, reference_time = reference_time)
+function opt(f::Function, T::Int, z::Int, maxiter::Int, p::Float64, roads =roads, sim = sim, reference_time = reference_time)
     @assert T > 0
     @assert z > 0
     @assert 0 <= p <= 1
