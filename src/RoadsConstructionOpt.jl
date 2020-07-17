@@ -12,6 +12,7 @@ using Base.Iterators
 using PyCall
 using Parameters
 using Colors
+using StatsBase
 
 include("types.jl")
 include("parameters.jl")
@@ -20,12 +21,14 @@ include("simulator.jl")
 include("visuals.jl")
 include("removed_edges.jl")
 include("roadworks.jl")
+include("roadworks_opt.jl")
 
 export get_sim, run_simulation!
 export ModelSettings, Agent, Stats, SimData
 export plot_edge_load, plot_edge_load_removed
 export top_congested_roads
 export get_solution, split_sequence, remove_edges
+export opt
 
 
 end # module
