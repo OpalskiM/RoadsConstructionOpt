@@ -26,4 +26,4 @@ plot_edge_load_removed(map_data, stats, roads) #Removed roads colored green
 reference_time=stats.simulation_total_time
 #get_solution(sim,roads,reference_time,5)
 
-@time opt(f, 5, 30, 50, 0.001)
+@time opt(f, 5, 30, 500, 0.001)
