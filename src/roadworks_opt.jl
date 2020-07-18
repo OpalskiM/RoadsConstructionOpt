@@ -25,7 +25,7 @@ function opt(f::Function, T::Int, z::Int, maxiter::Int, p::Float64, roads =roads
     @assert z > 0
     @assert 0 <= p <= 1
     sol = rand(1:T, z)
-    chunks,total = f(sol,roads,sim,reference_time)
+    chunks,total = f(T,sol,roads,sim,reference_time)
     best_sol = sol 
     best_eval = total 
     i = 0
@@ -37,7 +37,7 @@ function opt(f::Function, T::Int, z::Int, maxiter::Int, p::Float64, roads =roads
         dst = sample(1:T, Weights(exp.(-w))) 
         new_sol = copy(sol)
         new_sol[src] = dst
-        new_chunks, new_total = f(new_sol, roads,sim,reference_time)
+        new_chunks, new_total = f(T,new_sol, roads,sim,reference_time)
         if new_total <= total || rand() < p
             sol = new_sol
             total = new_total
@@ -55,12 +55,16 @@ end
 #auxiliary function f
 #finding maximum roadworks time for given permutation "sol"
 
-function f(sol,roads,sim,reference_time)
+function f(T,sol,roads,sim,reference_time)
     chunks=Float64[]
-    for i in unique(sol)
+    for i in 1:T
     spl=findall(x->x==i, sol)
+    if length(spl) == 0
+    push!(chunks,1)
+    else
     s=deepcopy(sim)
     push!(chunks,get_solution(s,roads[spl],reference_time,1))
+end
 end
 return chunks,maximum(chunks)
 end
