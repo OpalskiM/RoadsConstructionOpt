@@ -21,7 +21,7 @@ function top_congested_roads(s::SimData,vehicle_loads::AbstractMatrix, n::Int=30
     roads
 end
 
-function plot_edge_load_removed(mData::MapData, stats::Stats, roads::Vector{Tuple{Int64,Int64}}; file_out="EdgeLoads.html")
+function plot_edge_load_removed(mData::MapData, stats::SimStats, roads::Vector{Tuple{Int64,Int64}}; file_out="EdgeLoads.html")
     flm = pyimport("folium")
     matplotlib_cm = pyimport("matplotlib.cm")
     matplotlib_colors = pyimport("matplotlib.colors")

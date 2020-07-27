@@ -100,7 +100,7 @@ function get_sim(m::MapData, p::ModelSettings, speeds = OpenStreetMapX.SPEED_ROA
 end
 
 
-function update_stats!(stats::Stats, sim::SimData, edge0::Int, edge1::Int)
+function update_stats!(stats::SimStats, sim::SimData, edge0::Int, edge1::Int)
     stats.vehicle_load[edge0, edge1] += 1
     stats.actual_driving_times[edge0,edge1] = calculate_driving_time(stats.vehicle_load[edge0,edge1],sim.max_densities[edge0,edge1],sim.map_data.w[edge0,edge1],sim.velocities[edge0,edge1])
     stats.simulation_total_time += stats.actual_driving_times[edge0,edge1]
