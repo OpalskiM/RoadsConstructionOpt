@@ -13,10 +13,10 @@ end
 	population::Vector{Agent} = Agent[]
 end
 
-@with_kw mutable struct Stats
+@with_kw mutable struct SimStats
 	vehicle_load::SparseArrays.SparseMatrixCSC{Int64,Int64}
 	actual_driving_times::SparseArrays.SparseMatrixCSC{Float64,Int64} #latest travel time on the edge.
 	simulation_total_time::Float64 #total agents' simulation travel time in simulation
 end
 
-Stats(m::Int,n::Int) = Stats(SparseArrays.spzeros(Int, m, n),SparseArrays.spzeros(m, n),0.0)
+SimStats(m::Int,n::Int) = SimStats(SparseArrays.spzeros(Int, m, n),SparseArrays.spzeros(m, n),0.0)

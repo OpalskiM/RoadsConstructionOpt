@@ -3,7 +3,7 @@ function GetLLOfPoint2(mData::MapData,n::Int64)
     mypoint = (point.lat,point.lon)
 end
 
-function plot_edge_load(mData::MapData, stats::Stats; out_file="EdgeLoads.html")
+function plot_edge_load(mData::MapData, stats::SimStats; out_file="EdgeLoads.html")
     flm = pyimport("folium")
     matplotlib_cm = pyimport("matplotlib.cm")
     matplotlib_colors = pyimport("matplotlib.colors")
