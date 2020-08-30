@@ -15,18 +15,27 @@ pth = "winnipeg_downtownf.osm"
 
 map_data =  get_map_data(pth;use_cache = false, trim_to_connected_graph=true );
 sim = get_sim(map_data, p)
-
+sim2=deepcopy(sim) # creating a copy of sim_data for testing random solutions
 
 @time stats = run_simulation(sim)
 
-#plot_edge_load(map_data,stats)
-
 roads = top_congested_roads(sim,stats.vehicle_load,20)
 
-#plot_edge_load_removed(map_data, stats, roads) #Removed roads colored green
-
 reference_time=stats.simulation_total_time
-#get_solution(sim,roads,reference_time,5, Dict{Vector{Tuple{Int,Int},Float64}())
 
+ooo = @time opt(f, 2, 100, 0.001,roads, sim, reference_time) #Optimal solution
 
-ooo = @time opt(f, 2, 100, 0.001,roads, sim, reference_time)
+#Creating n random solutions and comparing relative performance with optimal solution
+T=2 #number of roadworks batches
+random_solutions=rand_sol(10,ooo) # Creating 10 random solutions and assesing performance. Result = Random/optimal
+
+#Visualisation
+plot_edge_load(map_data,stats)
+plot_edge_load_removed(map_data, stats, roads) #Removed roads colored green
+
+colors = ["yellow", "magenta"] #colours chosen to distinguish 1st and 2nd batch of roadworks.
+plot_optimal_plan(map_data, stats, roads,ooo) #Plotting optimal plan of roadworks
+
+sol = rand(1:T, length(roads)) #Creating a random permutation as a random feasible solution
+plot_random_plan(map_data, stats, roads) #Plotting a random solution using colors as above
+
