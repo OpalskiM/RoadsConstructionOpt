@@ -8,7 +8,7 @@ end
 function copy_remove_edges(m::MapData,edgelist::AbstractVector{Tuple{Int,Int}})::SimpleDiGraph{Int64}
     g = deepcopy(m.g)
     for edge in edgelist
-      LightGraphs.rem_edge!(g, edge[1],edge[2])
+      Graphs.rem_edge!(g, edge[1],edge[2])
     end
     g
 end
