@@ -1,5 +1,5 @@
 using OpenStreetMapX
-using LightGraphs
+using Graphs
 using Parameters
 
 using Pkg
