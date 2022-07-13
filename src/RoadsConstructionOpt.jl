@@ -1,7 +1,7 @@
 module RoadsConstructionOpt
 
 using OpenStreetMapX
-using LightGraphs
+using Graphs
 using SparseArrays
 using DataStructures
 using Distributions
