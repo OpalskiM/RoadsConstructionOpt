@@ -12,10 +12,10 @@ function greedy(sim::SimData,roads::Vector{Tuple{Int,Int}},T::Int, reference_tim
     sim_copy=deepcopy(sim)
     roads_copy=deepcopy(roads)
     for k in 1:T #loop for each batch of roadworks
-        batch=Tuple{Int,Int}[] #includes all roads to be removed in one batch
+        batch=Tuple{Int,Int}[] #includes all roads to be removed in one batch        
+        sim_roadworks=deepcopy(sim) #Creating a copy of sim data to simulate roadworks for each batch
         for j in 1:min(ceil(z/T),length(roads_copy)) # loop for z/T roads to be renovated in each batch
             store=[]
-            sim_roadworks=deepcopy(sim) #Creating a copy of sim data to simulate roadworks for each batch
                 for i in 1:length(roads_copy) #loop to check which road has the smallest negative impact
                     s=deepcopy(sim_copy) #Creating a copy of sim data to check simple impacts and find a candidate for next roadwork
                     remove_one_edge(s.map_data,roads_copy[i])
