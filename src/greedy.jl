@@ -15,14 +15,15 @@ function greedy(sim::SimData,roads::Vector{Tuple{Int,Int}},T::Int, reference_tim
         batch=Tuple{Int,Int}[] #includes all roads to be removed in one batch
         for j in 1:min(ceil(z/T),length(roads_copy)) # loop for z/T roads to be renovated in each batch
             store=[]
+            sim_roadworks=deepcopy(sim) #Creating a copy of sim data to simulate roadworks for each batch
                 for i in 1:length(roads_copy) #loop to check which road has the smallest negative impact
-                    s=deepcopy(sim_copy)
+                    s=deepcopy(sim_copy) #Creating a copy of sim data to check simple impacts and find a candidate for next roadwork
                     remove_one_edge(s.map_data,roads_copy[i])
                     score = run_simulation(s)
                     push!(store,(score.simulation_total_time, roads_copy[i]))
                 end
             candidate=argmin(store)
-            remove_one_edge(s.map_data,roads_copy[candidate]) #removing one road from the graph
+            remove_one_edge(sim_roadworks.map_data,roads_copy[candidate]) #removing one road from the graph
             splice!(roads_copy,candidate) #removing one road from the set of roads to be renovated
             push!(order,store[candidate][2])
             push!(batch,store[candidate][2])
