@@ -29,9 +29,7 @@ function greedy(sim::SimData,roads::Vector{Tuple{Int,Int}},T::Int, reference_tim
             push!(batch,store[candidate][2])
         end
                 #simulation
-                sim2=deepcopy(sim)
-                g = copy_remove_edges(sim2.map_data, batch)
-                stats = run_simulation(sim2, g)
+                stats = run_simulation(sim_roadworks)
                 simulation_total_time = stats.simulation_total_time
                 relative_time = simulation_total_time/reference_time
                 push!(results,relative_time)
