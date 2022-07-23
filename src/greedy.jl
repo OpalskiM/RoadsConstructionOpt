@@ -8,16 +8,15 @@ end
 function greedy(sim::SimData,roads::Vector{Tuple{Int,Int}},T::Int, reference_time::Float64)
     z=length(roads)
     results=Float64[] #Vector to store results of simulations (to find a maximum delay caused by roadworks)
-    order=Tuple{Int64, Int64}[] #Tuple to store the order of road closures
-    sim_copy=deepcopy(sim)
+    order=Tuple{Int, Int}[] #Tuple to store the order of road closures
     roads_copy=deepcopy(roads)
     for k in 1:T #loop for each batch of roadworks
-        batch=Tuple{Int,Int}[] #includes all roads to be removed in one batch        
+        batch=Tuple{Int64,Int64}[] #includes all roads to be removed in one batch
         sim_roadworks=deepcopy(sim) #Creating a copy of sim data to simulate roadworks for each batch
         for j in 1:min(ceil(z/T),length(roads_copy)) # loop for z/T roads to be renovated in each batch
-            store=[]
+            store=Tuple{Float64,Tuple{Int64,Int64}}[]
                 for i in 1:length(roads_copy) #loop to check which road has the smallest negative impact
-                    s=deepcopy(sim_copy) #Creating a copy of sim data to check simple impacts and find a candidate for next roadwork
+                    s=deepcopy(sim) #Creating a copy of sim data to check simple impacts and find a candidate for next roadwork
                     remove_one_edge(s.map_data,roads_copy[i])
                     score = run_simulation(s)
                     push!(store,(score.simulation_total_time, roads_copy[i]))
