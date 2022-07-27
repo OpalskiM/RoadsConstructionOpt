@@ -29,7 +29,7 @@ greedy_res=@time greedy(sim,roads,4, reference_time) #greedy solution
 
 #Creating n random solutions and comparing relative performance with optimal solution
 T=2 #number of roadworks batches
-random_solutions=rand_sol(10,ooo) # Creating 10 random solutions and assesing performance. Result = Random/optimal
+random_solutions=rand_sol(10,ooo) # Creating 10 random solutions and assesing performance. Result = Random/reference
 
 #Visualisation
 plot_edge_load(map_data,stats)
