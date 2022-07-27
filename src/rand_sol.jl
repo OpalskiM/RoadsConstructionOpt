@@ -11,12 +11,12 @@ end
 return res
 end
 
-#function to measure relative performance of random solutions compared to the optimal solution.
+#function to measure relative performance of random solutions 
 function rand_sol(n::Int64,optimal_solution::Tuple{Array{Int64,1},Float64,Int64})
 ran=rand_perm(n,T,sim2)
 res=[]
 for i in 1:n
-    push!(res, ran[i][2]/optimal_solution[2])
+    push!(res, ran[i][2])
 end
 return res
 end
