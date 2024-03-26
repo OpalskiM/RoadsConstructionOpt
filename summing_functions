@@ -1,0 +1,134 @@
+#new functions added to enable minimising the sum of the delays
+
+#"""
+#    get_solution(sim::SimData, roads::Vector{Tuple{Int,Int}},reference_time::Float64,no_of_partitions::Int)
+
+#Returns relative solution to reference scenario depending on number of partitions
+
+#**Arguments**
+#*'sim' - Sim Data
+#*'roads' - Roads to renovate
+#*'reference_time' - benchmark time (total time of simulation without roadworks)
+#*'no_of_partitions' - number of roadworks batches (time of each roadwork set to 1)
+#*'SOLUTION_BUFFER' - dictionary to store solutions
+#"""
+function get_solution_sum(sim::SimData, roads::Vector{Tuple{Int,Int}},
+    reference_time::Float64,
+    no_of_partitions::Int,
+    SOLUTION_BUFFER::Dict{Vector{Tuple{Int,Int}},Float64})
+res = Float64[]
+for segments in split_sequence(roads,no_of_partitions)
+simulation_total_time = get(SOLUTION_BUFFER, segments,-1.0)
+if simulation_total_time < -0.1
+g = copy_remove_edges(sim.map_data, segments)
+stats::SimStats = run_simulation(sim, g)
+simulation_total_time = stats.simulation_total_time
+SOLUTION_BUFFER[segments] = simulation_total_time
+end
+push!(res,simulation_total_time-reference_time)
+end
+#calculate maximum time spent in traffic
+sum(res)/reference_time
+#println(sum(res)/reference_time)
+end
+
+function f_sum(T,sol,roads,sim,reference_time, SOLUTION_BUFFER::Dict{Vector{Tuple{Int,Int}},Float64})
+    chunks=Float64[]
+    for i in 1:T
+        spl=findall(x->x==i, sol)
+        if length(spl) == 0
+            push!(chunks,1)
+        else
+            #s=deepcopy(sim)
+            push!(chunks,get_solution_sum(sim,roads[spl],reference_time,1,SOLUTION_BUFFER))
+        end
+    end
+    return chunks,sum(chunks)
+end
+function opt_sum(f::Function, T::Int, maxiter::Int, p::Float64,
+    roads::Vector{Tuple{Int,Int}}, sim::SimData,
+    reference_time::Float64,
+    SOLUTION_BUFFER::Dict{Vector{Tuple{Int,Int}},Float64} = Dict{Vector{Tuple{Int,Int}},Float64}()
+    )
+@assert T > 0 #ile periodow, ile okresow z remontami
+@assert length(roads) > 0
+@assert 0 <= p <= 1
+z = length(roads) #ile drog do remontu
+sol = rand(1:T, z) #poczatkowe rozwiazanie, T - time periods, z - liczba dróg. Dla każdej drogi z - dostajemy przydział w którym timeperiods (T) jest remontowany
+chunks,total = f_sum(T,sol,roads,sim,reference_time, SOLUTION_BUFFER)
+best_sol = sol
+best_eval = total
+i = 0
+while i < maxiter
+    i += 1
+    w = tiedrank(chunks)
+    maximum(w) == minimum(w) && break
+    src = sample(1:z, Weights(exp.(w[sol])))
+    dst = sample(1:T, Weights(exp.(-w)))
+    new_sol = copy(sol)
+    new_sol[src] = dst
+    new_chunks, new_total = f_sum(T,new_sol, roads,sim,reference_time,SOLUTION_BUFFER)
+    if new_total <= total || rand() < p
+        sol = new_sol
+        total = new_total
+        chunks = new_chunks
+        if total < best_eval
+            best_sol = sol
+            best_eval = total
+        end
+    end
+    if i % 10 == 0
+        print(".")
+    end
+end
+println()
+return best_sol, best_eval, i
+end
+
+function density_check_sum(opt::Tuple{Vector{Int64}, Float64, Int64}, T::Int64,density::Array{Float64,2})
+    avg_density=Float64[]
+        for i in 1:T
+            batch=findall(isequal(i),opt[1]) #identifying each batch of roadworks
+            leng=Float64[]
+            #checking the average distance between roads in the batch
+            for j in batch, k in batch
+                    push!(leng,(min(density[k,j], density[j,k])))
+                end
+            #n*(n-1)/2 pairs of distances
+            if length(batch)>1
+            Avg_dist=sum(leng)*2/(length(batch)*(length(batch)-1))
+        else
+            Avg_dist=0
+        end
+            push!(avg_density,Avg_dist)
+    end
+    #average roadworks density in all batches
+    return(mean(avg_density))
+    end
+
+
+function loops_sum(T::Int64,density::Array{Float64,2},roads::Vector{Tuple{Int64, Int64}}, sim::SimData, reference_time::Float64)
+    ooo = @time opt_sum(f, T, 1000, 0.001,roads, sim, reference_time)
+    return ooo[2], density_check_sum(ooo,T, density)
+end
+
+
+
+function initial_plan_sum(f::Function, T::Int, z::Int)
+    sol = zeros(Int, z)
+    for i in randperm(z)
+        chunks, total = f(sol, T)
+        sol[i] = rand(findall(==(minimum(chunks)), chunks))
+    end
+    return sol
+end
+
+function rand_perm_sum(n::Int64,T::Int64,sim::SimData,z::Int=length(roads),roads::Array{Tuple{Int64,Int64},1}=roads, reference_time::Float64=reference_time,SOLUTION_BUFFER::Dict{Vector{Tuple{Int,Int}},Float64} = Dict{Vector{Tuple{Int,Int}},Float64}())
+    res=[]
+    for i in 1:n
+    sim_copy=deepcopy(sim)
+    sol = rand(1:T, z)
+    push!(res,f_sum(T,sol,roads,sim_copy,reference_time, SOLUTION_BUFFER))
+    end
+    return res
+    end
